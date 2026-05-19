@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CampusMonopoly Board Preview</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 32px;
+        background: #f5faf8;
+        color: #183934;
+        font-family: "Microsoft YaHei", "Noto Sans SC", Arial, sans-serif;
+      }
+
+      main {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        margin: 0 0 20px;
+        font-size: 28px;
+      }
+
+      section {
+        margin-bottom: 28px;
+      }
+
+      .preview {
+        width: 100%;
+        background: #ffffff;
+        border: 1px solid #d2e2dc;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(36, 68, 56, 0.08);
+      }
+
+      .board {
+        aspect-ratio: 4 / 3;
+      }
+
+      .template {
+        aspect-ratio: 45 / 13;
+      }
+
+      .dice-row {
+        display: grid;
+        grid-template-columns: repeat(6, 90px);
+        gap: 16px;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>CampusMonopoly Board Preview</h1>
+
+      <section>
+        <img class="preview board" src="./campus_board_v2.svg" alt="CampusMonopoly campus board" />
+      </section>
+
+      <section>
+        <img class="preview template" src="./tile_grid_template_v2.svg" alt="CampusMonopoly tile templates" />
+      </section>
+
+      <section class="dice-row" aria-label="Dice faces">
+        <img src="./dice_1.svg" alt="dice 1" />
+        <img src="./dice_2.svg" alt="dice 2" />
+        <img src="./dice_3.svg" alt="dice 3" />
+        <img src="./dice_4.svg" alt="dice 4" />
+        <img src="./dice_5.svg" alt="dice 5" />
+        <img src="./dice_6.svg" alt="dice 6" />
+      </section>
+    </main>
+  </body>
+</html>

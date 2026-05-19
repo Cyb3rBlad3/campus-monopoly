@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 110" role="img" aria-labelledby="title desc">
+  <title id="title">CampusMonopoly dice faces</title>
+  <desc id="desc">Six static dice faces from one to six.</desc>
+  <defs>
+    <style>
+      .die { fill: #ffffff; stroke: #b9d6cc; stroke-width: 4; }
+      .pip { fill: #2f7764; }
+    </style>
+  </defs>
+  <rect width="660" height="110" fill="#f7fbf9"/>
+
+  <g id="dice-1" transform="translate(10 10)">
+    <rect class="die" width="90" height="90" rx="18"/>
+    <circle class="pip" cx="45" cy="45" r="8"/>
+  </g>
+  <g id="dice-2" transform="translate(120 10)">
+    <rect class="die" width="90" height="90" rx="18"/>
+    <circle class="pip" cx="28" cy="28" r="8"/>
+    <circle class="pip" cx="62" cy="62" r="8"/>
+  </g>
+  <g id="dice-3" transform="translate(230 10)">
+    <rect class="die" width="90" height="90" rx="18"/>
+    <circle class="pip" cx="27" cy="27" r="8"/>
+    <circle class="pip" cx="45" cy="45" r="8"/>
+    <circle class="pip" cx="63" cy="63" r="8"/>
+  </g>
+  <g id="dice-4" transform="translate(340 10)">
+    <rect class="die" width="90" height="90" rx="18"/>
+    <circle class="pip" cx="28" cy="28" r="8"/>
+    <circle class="pip" cx="62" cy="28" r="8"/>
+    <circle class="pip" cx="28" cy="62" r="8"/>
+    <circle class="pip" cx="62" cy="62" r="8"/>
+  </g>
+  <g id="dice-5" transform="translate(450 10)">
+    <rect class="die" width="90" height="90" rx="18"/>
+    <circle class="pip" cx="28" cy="28" r="8"/>
+    <circle class="pip" cx="62" cy="28" r="8"/>
+    <circle class="pip" cx="45" cy="45" r="8"/>
+    <circle class="pip" cx="28" cy="62" r="8"/>
+    <circle class="pip" cx="62" cy="62" r="8"/>
+  </g>
+  <g id="dice-6" transform="translate(560 10)">
+    <rect class="die" width="90" height="90" rx="18"/>
+    <circle class="pip" cx="28" cy="25" r="8"/>
+    <circle class="pip" cx="62" cy="25" r="8"/>
+    <circle class="pip" cx="28" cy="45" r="8"/>
+    <circle class="pip" cx="62" cy="45" r="8"/>
+    <circle class="pip" cx="28" cy="65" r="8"/>
+    <circle class="pip" cx="62" cy="65" r="8"/>
+  </g>
+</svg>
