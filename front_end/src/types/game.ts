@@ -1,0 +1,108 @@
+/**
+ * 与《CampusMonopoly_Improved_Rules.md》第十三节对齐的精简类型。
+ * 字段以后端实际返回为准，此处用于 TypeScript 提示与联调。
+ */
+
+export interface GameSettings {
+  maxPlayers: number;
+  maxHandCards: number;
+  parentTransferInterval: number;
+  coWinRoundLimit: number;
+}
+
+export interface SavingGoal {
+  type: string;
+  targetRate: number;
+  targetAmount: number;
+  completed: boolean;
+}
+
+export interface PlayerStats {
+  partTimeCount: number;
+  studyCount: number;
+  socialActionCount: number;
+  helpCount: number;
+  lowMoodCount: number;
+  averageEnergyTotal: number;
+  averageEnergySamples: number;
+}
+
+export interface PlayerTurnMemory {
+  lastActionType: string;
+  lastWorkedTurn: number;
+  consecutiveNoSocialTurns: number;
+  partTimeBlockedTurns: number;
+}
+
+export interface Player {
+  id: string;
+  name: string;
+  avatarId?: string;
+  pieceColor?: string;
+  money: number;
+  position: number;
+  bankrupt: boolean;
+  socialValue: number;
+  financeValue: number;
+  mood: number;
+  energy: number;
+  grade: number;
+  cognition: number;
+  savingGoal?: SavingGoal;
+  deposits: unknown[];
+  handCards: unknown[];
+  statuses: unknown[];
+  stats?: PlayerStats;
+  turnMemory?: PlayerTurnMemory;
+}
+
+export interface Tile {
+  id: string;
+  name: string;
+  type: string;
+  position: number;
+  cost: number;
+  actions?: string[];
+  icon?: string;
+}
+
+export interface GameDecks {
+  actionCardDeck: unknown[];
+  passiveEventDeck: unknown[];
+  discardPile: unknown[];
+}
+
+export interface GameState {
+  gameId: string;
+  roomId: string;
+  status: string;
+  round: number;
+  turnIndex: number;
+  currentPlayerId: string;
+  initialAllowance: number;
+  commonFund: number;
+  publicReserve: number;
+  board: Tile[];
+  players: Player[];
+  decks: GameDecks;
+  lastResult: TurnResult | null;
+  settings: GameSettings;
+}
+
+export interface TurnResult {
+  playerId: string;
+  dice: number;
+  fromPosition: number;
+  toPosition: number;
+  tileId: string;
+  moneyDelta: number;
+  moodDelta: number;
+  energyDelta: number;
+  gradeDelta: number;
+  cognitionDelta: number;
+  socialValueDelta: number;
+  financeValueDelta: number;
+  drawnCardId?: string;
+  triggeredEventId?: string;
+  messages: string[];
+}
