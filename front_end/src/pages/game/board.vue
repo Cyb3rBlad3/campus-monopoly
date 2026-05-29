@@ -326,11 +326,13 @@ onUnmounted(() => {
 
 <style scoped>
 .page {
-  padding: 24rpx;
-  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 16rpx;
   box-sizing: border-box;
   background: #f5faf6;
-  padding-bottom: 48rpx;
+  overflow: hidden;
 }
 .empty {
   padding: 48rpx;
@@ -340,169 +342,228 @@ onUnmounted(() => {
 .top-bar {
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  margin-bottom: 16rpx;
+  gap: 12rpx;
+  flex-shrink: 0;
+  margin-bottom: 12rpx;
 }
 .round {
-  font-size: 30rpx;
+  font-size: 26rpx;
   font-weight: 700;
   color: #1b5e20;
 }
 .phase {
   flex: 1;
-  font-size: 26rpx;
+  font-size: 24rpx;
   color: #558b2f;
 }
 .btn-mini {
-  font-size: 24rpx;
-  padding: 8rpx 20rpx;
+  font-size: 22rpx;
+  padding: 6rpx 16rpx;
   line-height: 1.4;
   background: #fff;
   color: #2e7d32;
   border: 1px solid #a5d6a7;
   border-radius: 8rpx;
 }
+.game-main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  gap: 12rpx;
+}
+.board-column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.board-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
 .board-img {
   width: 100%;
-  border-radius: 12rpx;
-  background: #fff;
-  margin-bottom: 16rpx;
+  height: 100%;
 }
 .tile-strip {
+  flex-shrink: 0;
+  height: 130rpx;
+  margin-top: 10rpx;
   white-space: nowrap;
-  margin-bottom: 20rpx;
+}
+.tile-strip-inner {
+  display: inline-flex;
+  padding: 4rpx 0;
 }
 .tile-chip {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  width: 140rpx;
-  margin-right: 12rpx;
-  padding: 12rpx;
+  width: 96rpx;
+  margin-right: 8rpx;
+  padding: 8rpx;
   background: #fff;
-  border-radius: 12rpx;
+  border-radius: 10rpx;
   border: 2px solid #e0e0e0;
-  vertical-align: top;
+  flex-shrink: 0;
 }
 .tile-chip.current {
   border-color: #2e7d32;
   background: #e8f5e9;
 }
 .tile-icon {
-  width: 56rpx;
-  height: 56rpx;
+  width: 40rpx;
+  height: 40rpx;
 }
 .tile-name {
-  font-size: 22rpx;
+  font-size: 18rpx;
   color: #212121;
-  margin-top: 6rpx;
+  margin-top: 4rpx;
   white-space: normal;
   text-align: center;
+  line-height: 1.2;
 }
 .tile-cost {
-  font-size: 20rpx;
+  font-size: 16rpx;
   color: #c62828;
 }
 .pieces {
   display: flex;
-  gap: 6rpx;
-  margin-top: 8rpx;
-  min-height: 16rpx;
+  gap: 4rpx;
+  margin-top: 4rpx;
+  min-height: 12rpx;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 .piece-dot {
-  width: 16rpx;
-  height: 16rpx;
+  width: 12rpx;
+  height: 12rpx;
   border-radius: 50%;
   border: 1px solid #fff;
 }
+.players-column {
+  width: 220rpx;
+  flex-shrink: 0;
+  height: 100%;
+}
 .players-panel {
-  margin-bottom: 20rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
 }
 .player-card {
   background: #fff;
-  border-radius: 12rpx;
-  padding: 20rpx;
-  margin-bottom: 12rpx;
+  border-radius: 10rpx;
+  padding: 12rpx;
   border: 1px solid #e0e0e0;
 }
 .player-card.current {
   border-color: #ffb74d;
 }
 .player-card.me {
-  border-left: 6rpx solid #2e7d32;
+  border-left: 4rpx solid #2e7d32;
 }
 .player-card.bankrupt {
   opacity: 0.5;
 }
+.p-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4rpx;
+}
 .p-name {
-  font-size: 28rpx;
+  font-size: 24rpx;
   font-weight: 700;
   color: #212121;
+  flex: 1;
+  line-height: 1.2;
+}
+.p-badges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2rpx;
+  flex-shrink: 0;
 }
 .badge {
-  font-size: 20rpx;
+  font-size: 18rpx;
   color: #2e7d32;
-  margin-left: 8rpx;
+  line-height: 1.2;
 }
 .badge.turn {
   color: #ef6c00;
 }
 .stat {
   display: block;
-  font-size: 24rpx;
+  font-size: 20rpx;
   color: #424242;
-  margin-top: 6rpx;
+  margin-top: 4rpx;
+  line-height: 1.3;
 }
 .stat.sub {
-  font-size: 22rpx;
+  font-size: 18rpx;
   color: #757575;
+}
+.bottom-panel {
+  flex-shrink: 0;
+  max-height: 38vh;
+  margin-top: 10rpx;
 }
 .log-card {
   background: #fff;
-  border-radius: 12rpx;
-  padding: 20rpx;
-  margin-bottom: 20rpx;
+  border-radius: 10rpx;
+  padding: 12rpx 16rpx;
+  margin-bottom: 10rpx;
   border: 1px solid #e0e0e0;
 }
 .log-title {
-  font-size: 26rpx;
+  font-size: 22rpx;
   font-weight: 700;
   color: #1b5e20;
-  margin-bottom: 8rpx;
+  margin-bottom: 4rpx;
   display: block;
 }
 .log-line {
   display: block;
-  font-size: 24rpx;
+  font-size: 20rpx;
   color: #424242;
-  line-height: 1.5;
-  margin-top: 4rpx;
+  line-height: 1.4;
+  margin-top: 2rpx;
 }
 .actions {
   background: #fff;
-  border-radius: 16rpx;
-  padding: 24rpx;
+  border-radius: 12rpx;
+  padding: 16rpx;
   border: 1px solid #c8e6c9;
 }
 .actions-title {
   display: block;
-  font-size: 28rpx;
+  font-size: 24rpx;
   font-weight: 700;
   color: #1b5e20;
-  margin-bottom: 16rpx;
+  margin-bottom: 10rpx;
 }
 .action-group {
-  margin-bottom: 12rpx;
+  margin-bottom: 8rpx;
 }
 .group-label {
   display: block;
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: #616161;
-  margin-bottom: 8rpx;
+  margin-bottom: 6rpx;
 }
 .btn {
-  margin-top: 12rpx;
-  border-radius: 12rpx;
+  margin-top: 8rpx;
+  border-radius: 10rpx;
+  font-size: 26rpx;
 }
 .btn.primary {
   background-color: #2e7d32;
@@ -519,32 +580,33 @@ onUnmounted(() => {
 }
 .hint {
   display: block;
-  font-size: 22rpx;
+  font-size: 20rpx;
   color: #757575;
-  margin-top: 16rpx;
-  line-height: 1.5;
+  margin-top: 10rpx;
+  line-height: 1.4;
 }
 .result-card {
   background: #e8f5e9;
-  border-radius: 16rpx;
-  padding: 32rpx;
+  border-radius: 12rpx;
+  padding: 20rpx;
   text-align: center;
 }
 .result-title {
-  font-size: 32rpx;
+  font-size: 28rpx;
   font-weight: 700;
   color: #1b5e20;
   display: block;
 }
 .result-winner {
-  font-size: 28rpx;
+  font-size: 24rpx;
   color: #212121;
-  margin: 16rpx 0 24rpx;
+  margin: 12rpx 0 16rpx;
   display: block;
 }
 .err {
   color: #c62828;
-  font-size: 26rpx;
-  margin-top: 16rpx;
+  font-size: 24rpx;
+  margin-top: 8rpx;
+  flex-shrink: 0;
 }
 </style>

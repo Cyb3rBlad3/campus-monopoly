@@ -21,7 +21,8 @@
     {
       "path": "pages/game/board",
       "style": {
-        "navigationBarTitleText": "对局"
+        "navigationBarTitleText": "对局",
+        "disableScroll": true
       }
     }
   ],
