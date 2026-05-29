@@ -1,0 +1,1 @@
+"""CampusMonopoly backend package."""
