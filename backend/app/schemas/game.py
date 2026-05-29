@@ -10,6 +10,7 @@ class CreateRoomRequest(BaseModel):
 
 class JoinPlayerRequest(BaseModel):
     name: str = Field(default="玩家", min_length=1, max_length=32)
+    deviceId: str = Field(min_length=8, max_length=128)
     avatarId: str | None = None
     pieceColor: str | None = None
     savingGoalType: str = Field(default="standard")

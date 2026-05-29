@@ -37,12 +37,36 @@ def configure_engine(database_url: str | None = None) -> None:
     SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 
 
+def _sqlite_add_column_if_missing(table: str, column: str, ddl: str) -> None:
+    if engine is None:
+        return
+    url = str(engine.url)
+    if not url.startswith("sqlite"):
+        return
+    with engine.connect() as conn:
+        rows = conn.exec_driver_sql(f"PRAGMA table_info({table})").fetchall()
+        names = {row[1] for row in rows}
+        if column not in names:
+            conn.exec_driver_sql(ddl)
+            conn.commit()
+
+
 def init_db() -> None:
     from app.db.models import Base
 
     if engine is None:
         configure_engine()
     Base.metadata.create_all(bind=engine)
+    _sqlite_add_column_if_missing(
+        "room_players",
+        "device_id",
+        "ALTER TABLE room_players ADD COLUMN device_id VARCHAR(128)",
+    )
+    _sqlite_add_column_if_missing(
+        "room_players",
+        "last_seen_at",
+        "ALTER TABLE room_players ADD COLUMN last_seen_at DATETIME",
+    )
 
 
 def get_db():

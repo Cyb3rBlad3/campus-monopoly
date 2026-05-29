@@ -1,12 +1,35 @@
 import { postJson, getJson, type GameMutationResponse } from "./http";
 import type { GameState } from "../types/game";
+import type { PresenceResponse, RejoinResponse, RoomSummary } from "../types/room";
 
 export type CreateRoomBody = Record<string, unknown>;
 export type JoinPlayerBody = Record<string, unknown>;
 export type StartGameBody = Record<string, unknown>;
 
+export function listRooms(params?: { status?: string; limit?: number }) {
+  const parts: string[] = [];
+  if (params?.status) parts.push(`status=${encodeURIComponent(params.status)}`);
+  if (params?.limit) parts.push(`limit=${String(params.limit)}`);
+  const q = parts.length ? `?${parts.join("&")}` : "";
+  return getJson<RoomSummary[]>(`/api/rooms${q}`);
+}
+
 export function createRoom(body?: CreateRoomBody) {
   return postJson<GameState | { roomId: string }>("/api/rooms", body);
+}
+
+export function touchPresence(roomId: string, body?: JoinPlayerBody) {
+  return postJson<PresenceResponse>(
+    `/api/rooms/${encodeURIComponent(roomId)}/presence`,
+    body
+  );
+}
+
+export function rejoinRoom(roomId: string, body?: JoinPlayerBody) {
+  return postJson<RejoinResponse>(
+    `/api/rooms/${encodeURIComponent(roomId)}/rejoin`,
+    body
+  );
 }
 
 export function joinRoom(roomId: string, body?: JoinPlayerBody) {

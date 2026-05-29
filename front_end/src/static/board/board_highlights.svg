@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120" role="img" aria-labelledby="title desc">
+  <title id="title">CampusMonopoly board highlights</title>
+  <desc id="desc">Reusable highlight rings and path markers for CampusMonopoly board interactions.</desc>
+  <defs>
+    <style>
+      .current-tile { fill: none; stroke: #2fbf8f; stroke-width: 8; stroke-linecap: round; stroke-dasharray: 18 10; }
+      .route { fill: none; stroke: #52a9e8; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; opacity: .75; }
+      .player-turn { fill: none; stroke: #f2b735; stroke-width: 8; }
+      .target { fill: #2fbf8f; opacity: .18; stroke: #2fbf8f; stroke-width: 4; }
+    </style>
+  </defs>
+  <rect width="360" height="120" fill="#f7fbf9"/>
+  <g id="current-tile-highlight" transform="translate(20 20)">
+    <rect class="current-tile" width="90" height="70" rx="18"/>
+  </g>
+  <g id="movement-path-highlight" transform="translate(145 25)">
+    <path class="route" d="M0 45 C32 0, 72 92, 110 28"/>
+  </g>
+  <g id="current-player-ring" transform="translate(305 55)">
+    <circle class="player-turn" r="34"/>
+    <circle class="target" r="24"/>
+  </g>
+</svg>

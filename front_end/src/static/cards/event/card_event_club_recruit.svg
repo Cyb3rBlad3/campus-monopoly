@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 128" role="img" aria-labelledby="title">
+  <title id="title">社团招新</title>
+  <rect width="96" height="128" rx="12" fill="#ffffff" stroke="#d2e2dc" stroke-width="3"/>
+  <rect x="0" y="0" width="96" height="18" rx="12" fill="#7eb8e8"/>
+  <rect x="0" y="10" width="96" height="8" fill="#7eb8e8"/>
+  <g transform="translate(8 28)">
+    <path fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="#4f7fb8" d="M32 56 l16 -28 16 28 z"/>
+    <path fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="#4f7fb8" d="M28 56 h48"/>
+    <path fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="#4f7fb8" d="M40 44 h16"/>
+  </g>
+  <text x="48" y="118" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans SC, Arial, sans-serif" font-size="11" font-weight="700" fill="#657a74">social</text>
+</svg>

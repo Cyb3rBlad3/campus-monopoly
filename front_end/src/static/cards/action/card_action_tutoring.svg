@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 128" role="img" aria-labelledby="title">
+  <title id="title">学霸辅导</title>
+  <rect width="96" height="128" rx="12" fill="#ffffff" stroke="#d2e2dc" stroke-width="3"/>
+  <rect x="0" y="0" width="96" height="18" rx="12" fill="#6dbf9a"/>
+  <rect x="0" y="10" width="96" height="8" fill="#6dbf9a"/>
+  <g transform="translate(8 28)">
+    <path fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="#2c7a67" d="M28 36 c16 -8 28 -4 28 8 v32 c-12 -8 -22 -10 -28 -6 z"/>
+    <path fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="#4f7fb8" d="M60 44 c0 -10 14 -14 26 -6 v20 c-8 -4 -18 -2 -26 4 z"/>
+    <path fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="#4f7fb8" d="M62 28 c8 -6 18 -4 20 6"/>
+  </g>
+  <text x="48" y="118" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans SC, Arial, sans-serif" font-size="11" font-weight="700" fill="#657a74">income</text>
+</svg>

@@ -1,0 +1,191 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">CampusMonopoly campus board</title>
+  <desc id="desc">A clean flat campus board with sixteen non-overlapping route tiles for CampusMonopoly.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f5faf8; }
+      .route { fill: none; stroke: #b9dcca; stroke-width: 18; stroke-linecap: round; stroke-linejoin: round; }
+      .green { fill: #e9fbf2; }
+      .red { fill: #fff3ef; }
+      .blue { fill: #eef6ff; }
+      .yellow { fill: #fff8e6; }
+      .purple { fill: #f5efff; }
+      .tile { stroke: #d2e2dc; stroke-width: 3; }
+      .tile-shadow { fill: #d9e8e1; opacity: .45; }
+      .tile-name {
+        font-family: "Microsoft YaHei", "Noto Sans SC", Arial, sans-serif;
+        font-size: 22px;
+        font-weight: 800;
+        fill: #183934;
+        text-anchor: middle;
+      }
+      .icon {
+        fill: none;
+        stroke: #2c7a67;
+        stroke-width: 6;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        transform-box: fill-box;
+        transform-origin: center;
+        transform: translateY(-18px) scale(.76);
+      }
+      .icon-red { stroke: #cf6f61; }
+      .icon-blue { stroke: #4f7fb8; }
+      .icon-yellow { stroke: #b98714; }
+      .icon-purple { stroke: #7b64b6; }
+      .center-grass { fill: #dcf3e8; stroke: #88c9aa; stroke-width: 4; }
+      .center-card { fill: #ffffff; stroke: #cfe2da; stroke-width: 2; }
+      .center-title {
+        font-family: "Microsoft YaHei", "Noto Sans SC", Arial, sans-serif;
+        font-size: 36px;
+        font-weight: 800;
+        fill: #173a35;
+        text-anchor: middle;
+      }
+      .center-sub {
+        font-family: "Microsoft YaHei", "Noto Sans SC", Arial, sans-serif;
+        font-size: 17px;
+        fill: #657a74;
+        text-anchor: middle;
+      }
+      .fund-label {
+        font-family: "Microsoft YaHei", "Noto Sans SC", Arial, sans-serif;
+        font-size: 15px;
+        fill: #657a74;
+        text-anchor: middle;
+      }
+      .fund-value {
+        font-family: "Microsoft YaHei", "Noto Sans SC", Arial, sans-serif;
+        font-size: 25px;
+        font-weight: 800;
+        fill: #173a35;
+        text-anchor: middle;
+      }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1200" height="900"/>
+  <path class="route" d="M180 125 H1020 V775 H180 Z"/>
+
+  <ellipse class="center-grass" cx="600" cy="450" rx="340" ry="220"/>
+  <rect class="center-card" x="415" y="342" width="370" height="135" rx="28"/>
+  <text class="center-title" x="600" y="397">CampusMonopoly</text>
+  <text class="center-sub" x="600" y="432">宿舍交流 · 储蓄规划 · 校园社交</text>
+  <rect class="center-card" x="505" y="502" width="190" height="74" rx="20"/>
+  <text class="fund-label" x="600" y="531">公共储备金</text>
+  <text class="fund-value" x="600" y="560">¥ 0</text>
+
+  <g id="tiles">
+    <g id="tile-teaching-building" transform="translate(95 55)">
+      <rect class="tile-shadow" x="5" y="7" width="170" height="120" rx="22"/>
+      <rect class="tile green" width="170" height="120" rx="22"/>
+      <path class="icon" d="M51 57 h68 M61 57 V31 h48 v26 M74 57 V43 h22 v14"/>
+      <text class="tile-name" x="85" y="100">教学楼</text>
+    </g>
+
+    <g id="tile-canteen" transform="translate(310 55)">
+      <rect class="tile-shadow" x="5" y="7" width="170" height="120" rx="22"/>
+      <rect class="tile red" width="170" height="120" rx="22"/>
+      <path class="icon icon-red" d="M57 30 v36 M76 30 v36 M57 48 h19 M108 30 c20 17 20 39 0 56"/>
+      <text class="tile-name" x="85" y="100">食堂</text>
+    </g>
+
+    <g id="tile-library" transform="translate(525 55)">
+      <rect class="tile-shadow" x="5" y="7" width="170" height="120" rx="22"/>
+      <rect class="tile green" width="170" height="120" rx="22"/>
+      <path class="icon" d="M49 34 c21 -9 36 -4 37 8 v38 c-13 -10 -27 -13 -37 -7 z M86 42 c1 -12 16 -17 37 -8 v39 c-10 -6 -24 -3 -37 7 z"/>
+      <text class="tile-name" x="85" y="100">图书馆</text>
+    </g>
+
+    <g id="tile-supermarket" transform="translate(740 55)">
+      <rect class="tile-shadow" x="5" y="7" width="170" height="120" rx="22"/>
+      <rect class="tile red" width="170" height="120" rx="22"/>
+      <path class="icon icon-red" d="M52 38 h70 l-10 34 H63 z M66 84 h2 M104 84 h2 M58 38 l-7 -15"/>
+      <text class="tile-name" x="85" y="100">超市</text>
+    </g>
+
+    <g id="tile-package-station" transform="translate(955 55)">
+      <rect class="tile-shadow" x="5" y="7" width="170" height="120" rx="22"/>
+      <rect class="tile blue" width="170" height="120" rx="22"/>
+      <path class="icon icon-blue" d="M52 40 l33 -15 33 15 v38 l-33 15 -33 -15 z M52 40 l33 15 33 -15 M85 55 v38"/>
+      <text class="tile-name" x="85" y="100">快递站</text>
+    </g>
+
+    <g id="tile-milk-tea" transform="translate(955 215)">
+      <rect class="tile-shadow" x="5" y="7" width="170" height="120" rx="22"/>
+      <rect class="tile red" width="170" height="120" rx="22"/>
+      <path class="icon icon-red" d="M62 36 h46 l-8 49 H70 z M74 36 l-6 -18 M73 65 h4 M87 71 h4 M101 61 h4"/>
+      <text class="tile-name" x="85" y="100">奶茶店</text>
+    </g>
+
+    <g id="tile-takeout" transform="translate(955 375)">
+      <rect class="tile-shadow" x="5" y="7" width="170" height="120" rx="22"/>
+      <rect class="tile red" width="170" height="120" rx="22"/>
+      <path class="icon icon-red" d="M58 49 h54 l-6 37 H64 z M70 49 c0 -18 30 -18 30 0 M51 34 h68"/>
+      <text class="tile-name" x="85" y="100">外卖店</text>
+    </g>
+
+    <g id="tile-online-shopping" transform="translate(955 535)">
+      <rect class="tile-shadow" x="5" y="7" width="170" height="120" rx="22"/>
+      <rect class="tile red" width="170" height="120" rx="22"/>
+      <path class="icon icon-red" d="M64 27 h42 v61 H64 z M77 77 h16 M70 40 h30 M74 55 h22"/>
+      <text class="tile-name" x="85" y="100">网购点</text>
+    </g>
+
+    <g id="tile-cinema" transform="translate(955 695)">
+      <rect class="tile-shadow" x="5" y="7" width="170" height="120" rx="22"/>
+      <rect class="tile blue" width="170" height="120" rx="22"/>
+      <path class="icon icon-blue" d="M53 38 h64 v43 H53 z M65 38 v43 M105 38 v43 M53 53 h64 M53 67 h64"/>
+      <text class="tile-name" x="85" y="100">电影院</text>
+    </g>
+
+    <g id="tile-part-time-center" transform="translate(740 695)">
+      <rect class="tile-shadow" x="5" y="7" width="170" height="120" rx="22"/>
+      <rect class="tile green" width="170" height="120" rx="22"/>
+      <path class="icon" d="M58 44 h54 v38 H58 z M72 44 v-11 h26 v11 M73 64 h24"/>
+      <text class="tile-name" x="85" y="100">兼职中心</text>
+    </g>
+
+    <g id="tile-dormitory" transform="translate(525 695)">
+      <rect class="tile-shadow" x="5" y="7" width="170" height="120" rx="22"/>
+      <rect class="tile blue" width="170" height="120" rx="22"/>
+      <path class="icon icon-blue" d="M53 81 V43 l32 -20 32 20 v38 M72 81 V58 h26 v23"/>
+      <text class="tile-name" x="85" y="100">宿舍</text>
+    </g>
+
+    <g id="tile-bank" transform="translate(310 695)">
+      <rect class="tile-shadow" x="5" y="7" width="170" height="120" rx="22"/>
+      <rect class="tile yellow" width="170" height="120" rx="22"/>
+      <path class="icon icon-yellow" d="M52 52 h66 M61 52 v31 M80 52 v31 M99 52 v31 M52 83 h66 M85 28 l37 24 H48 z"/>
+      <text class="tile-name" x="85" y="100">银行</text>
+    </g>
+
+    <g id="tile-exam-site" transform="translate(95 695)">
+      <rect class="tile-shadow" x="5" y="7" width="170" height="120" rx="22"/>
+      <rect class="tile purple" width="170" height="120" rx="22"/>
+      <path class="icon icon-purple" d="M62 25 h46 v60 H62 z M73 42 h24 M73 56 h24 M73 70 h14"/>
+      <text class="tile-name" x="85" y="100">考点</text>
+    </g>
+
+    <g id="tile-club-square" transform="translate(95 535)">
+      <rect class="tile-shadow" x="5" y="7" width="170" height="120" rx="22"/>
+      <rect class="tile blue" width="170" height="120" rx="22"/>
+      <path class="icon icon-blue" d="M52 76 c8 -19 26 -19 34 0 M80 76 c8 -19 26 -19 34 0 M67 43 a10 10 0 1 0 0 1 M96 43 a10 10 0 1 0 0 1"/>
+      <text class="tile-name" x="85" y="100">社团广场</text>
+    </g>
+
+    <g id="tile-wish-wall" transform="translate(95 375)">
+      <rect class="tile-shadow" x="5" y="7" width="170" height="120" rx="22"/>
+      <rect class="tile yellow" width="170" height="120" rx="22"/>
+      <path class="icon icon-yellow" d="M60 30 h50 v43 H77 l-17 14 V30 z M77 52 h16 M85 44 v16"/>
+      <text class="tile-name" x="85" y="100">心愿墙</text>
+    </g>
+
+    <g id="tile-dorm-meeting" transform="translate(95 215)">
+      <rect class="tile-shadow" x="5" y="7" width="170" height="120" rx="22"/>
+      <rect class="tile blue" width="170" height="120" rx="22"/>
+      <path class="icon icon-blue" d="M52 58 c20 -22 46 -22 66 0 M65 77 h40 M59 46 h52 M73 33 h24"/>
+      <text class="tile-name" x="85" y="100">宿舍议事厅</text>
+    </g>
+  </g>
+</svg>

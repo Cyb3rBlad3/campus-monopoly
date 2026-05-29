@@ -4,7 +4,7 @@
 
 前端是 Vue 3 + TypeScript + uni-app H5。入口 `src/main.ts` 创建 Vue 应用并安装 Pinia。页面注册在 `src/pages.json` 中，目前有首页、房间页、棋盘页三页。
 
-前端当前不是完整游戏客户端，而是一个联调壳：它已经声明了 API、类型和状态缓存方式，但页面只做到手动保存房间/对局 ID 与拉取 `GameState` 摘要。
+前端已实现本地 2–4 人轮流的主玩法循环（房间创建/加入/开局、掷骰、地块行动、行动牌、结束回合），规则结果以后端 `GameState` 为准。
 
 ## 首页流程
 
@@ -18,25 +18,21 @@
 
 ## 房间页流程
 
-`src/pages/room/create.vue` 当前只是联调辅助页：
+`src/pages/room/create.vue` 为房间大厅：
 
-1. 页面加载时读取 Pinia session 中保存的 `roomId` 和 `gameId`。
-2. 用户可以手动填写这两个 ID。
-3. 点击保存后写回 session。
-4. 点击进入棋盘页前只检查 `gameId` 是否存在。
-
-后端影响：首期可以先用 Postman、curl 或测试脚本创建房间、加入玩家、开局，再把返回的 `gameId` 填进前端页面验证 `GET /api/games/:gameId`。
+1. 选择生活费档位、储蓄目标与昵称。
+2. 创建房间后创建者自动加入；他人凭房间号加入。
+3. ≥2 人时可调用 `startRoom` 开局并跳转棋盘。
+4. session 通过 `uni.storage` 持久化 `roomId/gameId/localPlayerId`。
 
 ## 棋盘页流程
 
-`src/pages/game/board.vue` 目前只做状态读取：
+`src/pages/game/board.vue` 为对局主界面：
 
-1. 从 session 读取 `gameId`。
-2. 点击“拉取 GameState”后调用 `getGame(gameId)`。
-3. 成功后调用 `game.setFromResponse(res.data, null)`。
-4. 页面展示 `status`、`round`、`currentPlayerId`、玩家数量和最近消息。
-
-后端影响：`GET /api/games/:gameId` 必须优先稳定。只要这个接口返回兼容 `GameState` 的 JSON，前端当前页面就能联调。
+1. 展示棋盘底图、地块条、玩家资金与成长数值、回合日志。
+2. 当前玩家回合内：掷骰 → 可选地块行动（兼职/学习/休息/社交/存款）→ 可选使用后端已实现的 6 张行动牌 → 结束回合。
+3. 非当前玩家每 4 秒轮询 `getGame` 刷新状态（本地 pass-and-play）。
+4. `status=finished` 时展示获胜者。
 
 ## 接口调用链
 

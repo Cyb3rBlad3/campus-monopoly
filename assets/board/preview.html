@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CampusMonopoly Board Preview</title>
+    <title>CampusMonopoly Assets Preview</title>
     <style>
       body {
         margin: 0;
@@ -18,9 +18,14 @@
         margin: 0 auto;
       }
 
-      h1 {
-        margin: 0 0 20px;
-        font-size: 28px;
+      h1,
+      h2 {
+        margin: 0 0 16px;
+      }
+
+      h2 {
+        margin-top: 40px;
+        font-size: 22px;
       }
 
       section {
@@ -43,34 +48,189 @@
         aspect-ratio: 45 / 13;
       }
 
-      .dice-row {
+      .dice-row,
+      .icon-grid,
+      .card-grid {
         display: grid;
-        grid-template-columns: repeat(6, 90px);
         gap: 16px;
         align-items: center;
+      }
+
+      .dice-row {
+        grid-template-columns: repeat(6, 90px);
+      }
+
+      .icon-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      }
+
+      .card-grid {
+        grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+      }
+
+      .icon-cell,
+      .card-cell {
+        text-align: center;
+        background: #fff;
+        border: 1px solid #d2e2dc;
+        border-radius: 10px;
+        padding: 10px 6px 8px;
+      }
+
+      .icon-cell img {
+        width: 80px;
+        height: 80px;
+      }
+
+      .card-cell img {
+        width: 72px;
+        height: auto;
+      }
+
+      .icon-cell span,
+      .card-cell span {
+        display: block;
+        margin-top: 6px;
+        font-size: 11px;
+        color: #657a74;
+        word-break: break-all;
       }
     </style>
   </head>
   <body>
     <main>
-      <h1>CampusMonopoly Board Preview</h1>
+      <h1>CampusMonopoly Assets Preview</h1>
 
       <section>
+        <h2>棋盘</h2>
         <img class="preview board" src="./campus_board_v2.svg" alt="CampusMonopoly campus board" />
       </section>
 
       <section>
+        <h2>地块模板</h2>
         <img class="preview template" src="./tile_grid_template_v2.svg" alt="CampusMonopoly tile templates" />
       </section>
 
-      <section class="dice-row" aria-label="Dice faces">
-        <img src="./dice_1.svg" alt="dice 1" />
-        <img src="./dice_2.svg" alt="dice 2" />
-        <img src="./dice_3.svg" alt="dice 3" />
-        <img src="./dice_4.svg" alt="dice 4" />
-        <img src="./dice_5.svg" alt="dice 5" />
-        <img src="./dice_6.svg" alt="dice 6" />
+      <section>
+        <h2>骰子</h2>
+        <div class="dice-row" aria-label="Dice faces">
+          <img src="./dice_1.svg" alt="dice 1" />
+          <img src="./dice_2.svg" alt="dice 2" />
+          <img src="./dice_3.svg" alt="dice 3" />
+          <img src="./dice_4.svg" alt="dice 4" />
+          <img src="./dice_5.svg" alt="dice 5" />
+          <img src="./dice_6.svg" alt="dice 6" />
+        </div>
+      </section>
+
+      <section>
+        <h2>地块图标（16）</h2>
+        <div class="icon-grid" id="tiles-grid"></div>
+      </section>
+
+      <section>
+        <h2>行动牌（16）</h2>
+        <div class="card-grid" id="action-grid"></div>
+      </section>
+
+      <section>
+        <h2>被动事件（18）</h2>
+        <div class="card-grid" id="event-grid"></div>
+      </section>
+
+      <section>
+        <h2>状态图标</h2>
+        <div class="icon-grid" id="stats-grid"></div>
       </section>
     </main>
+    <script>
+      const tiles = [
+        "tile_teaching_building",
+        "tile_canteen",
+        "tile_library",
+        "tile_supermarket",
+        "tile_package_station",
+        "tile_milk_tea",
+        "tile_takeout",
+        "tile_online_shop",
+        "tile_cinema",
+        "tile_part_time_center",
+        "tile_dormitory",
+        "tile_bank",
+        "tile_exam_site",
+        "tile_club_square",
+        "tile_wish_wall",
+        "tile_dorm_meeting",
+      ];
+
+      const actions = [
+        "card_action_group_party",
+        "card_action_birthday_party",
+        "card_action_delivery_runner",
+        "card_action_group_buy_discount",
+        "card_action_dorm_purchase",
+        "card_action_grant",
+        "card_action_treat_milk_tea",
+        "card_action_overtime_job",
+        "card_action_bulk_stock",
+        "card_action_tutoring",
+        "card_action_resale",
+        "card_action_public_payment",
+        "card_action_forbid",
+        "card_action_budget",
+        "card_action_meal_partner",
+        "card_action_book_swap",
+      ];
+
+      const events = [
+        "card_event_found_meal_card",
+        "card_event_lost_package",
+        "card_event_exam_resit",
+        "card_event_canteen_free",
+        "card_event_lottery",
+        "card_event_utility_overrun",
+        "card_event_found_change",
+        "card_event_online_return",
+        "card_event_library_fine",
+        "card_event_part_time_bonus",
+        "card_event_meal_card_reissue",
+        "card_event_scholarship_bonus",
+        "card_event_roommate_pay",
+        "card_event_coupon",
+        "card_event_club_recruit",
+        "card_event_class_meeting",
+        "card_event_budget_success",
+        "card_event_dorm_talk",
+      ];
+
+      const stats = [
+        "stat_money",
+        "stat_social",
+        "stat_finance",
+        "stat_action_cards",
+        "stat_common_fund",
+        "stat_saving_goal",
+      ];
+
+      function fillGrid(id, base, files) {
+        const root = document.getElementById(id);
+        files.forEach((name) => {
+          const cell = document.createElement("div");
+          cell.className = id.includes("card") ? "card-cell" : "icon-cell";
+          const img = document.createElement("img");
+          img.src = `${base}/${name}.svg`;
+          img.alt = name;
+          const label = document.createElement("span");
+          label.textContent = name;
+          cell.append(img, label);
+          root.append(cell);
+        });
+      }
+
+      fillGrid("tiles-grid", "../tiles", tiles);
+      fillGrid("action-grid", "../cards/action", actions);
+      fillGrid("event-grid", "../cards/event", events);
+      fillGrid("stats-grid", "../icons/stats", stats);
+    </script>
   </body>
 </html>

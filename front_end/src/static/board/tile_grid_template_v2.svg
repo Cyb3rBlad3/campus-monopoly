@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 260" role="img" aria-labelledby="title desc">
+  <title id="title">CampusMonopoly tile grid template</title>
+  <desc id="desc">Clean non-overlapping tile style examples for income, expense, social, saving, and special spaces.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f5faf8; }
+      .tile { stroke: #d2e2dc; stroke-width: 4; }
+      .shadow { fill: #d9e8e1; opacity: .45; }
+      .income { fill: #e9fbf2; }
+      .expense { fill: #fff3ef; }
+      .social { fill: #eef6ff; }
+      .saving { fill: #fff8e6; }
+      .special { fill: #f5efff; }
+      .title {
+        font-family: "Microsoft YaHei", "Noto Sans SC", Arial, sans-serif;
+        font-size: 24px;
+        font-weight: 800;
+        fill: #183934;
+        text-anchor: middle;
+      }
+      .icon {
+        fill: none;
+        stroke: #2c7a67;
+        stroke-width: 7;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        transform-box: fill-box;
+        transform-origin: center;
+        transform: translateY(-18px) scale(.76);
+      }
+      .red { stroke: #cf6f61; }
+      .blue { stroke: #4f7fb8; }
+      .yellow { stroke: #b98714; }
+      .purple { stroke: #7b64b6; }
+    </style>
+  </defs>
+  <rect class="bg" width="900" height="260"/>
+
+  <g transform="translate(40 35)">
+    <rect class="shadow" x="5" y="7" width="140" height="175" rx="24"/>
+    <rect class="tile income" width="140" height="175" rx="24"/>
+    <path class="icon" d="M42 73 h56 M52 73 V43 h36 v30"/>
+    <text class="title" x="70" y="130">收入</text>
+  </g>
+
+  <g transform="translate(215 35)">
+    <rect class="shadow" x="5" y="7" width="140" height="175" rx="24"/>
+    <rect class="tile expense" width="140" height="175" rx="24"/>
+    <path class="icon red" d="M42 55 h58 l-9 38 H51 z M55 108 h1 M86 108 h1"/>
+    <text class="title" x="70" y="130">支出</text>
+  </g>
+
+  <g transform="translate(390 35)">
+    <rect class="shadow" x="5" y="7" width="140" height="175" rx="24"/>
+    <rect class="tile social" width="140" height="175" rx="24"/>
+    <path class="icon blue" d="M38 89 c8 -22 28 -22 36 0 M66 89 c8 -22 28 -22 36 0 M55 52 a11 11 0 1 0 0 1 M84 52 a11 11 0 1 0 0 1"/>
+    <text class="title" x="70" y="130">社交</text>
+  </g>
+
+  <g transform="translate(565 35)">
+    <rect class="shadow" x="5" y="7" width="140" height="175" rx="24"/>
+    <rect class="tile saving" width="140" height="175" rx="24"/>
+    <path class="icon yellow" d="M37 72 h66 M47 72 v33 M70 72 v33 M93 72 v33 M37 105 h66 M70 42 l38 30 H32 z"/>
+    <text class="title" x="70" y="130">储蓄</text>
+  </g>
+
+  <g transform="translate(740 35)">
+    <rect class="shadow" x="5" y="7" width="140" height="175" rx="24"/>
+    <rect class="tile special" width="140" height="175" rx="24"/>
+    <path class="icon purple" d="M51 43 h38 v60 H51 z M61 60 h18 M61 74 h18 M61 88 h10"/>
+    <text class="title" x="70" y="130">特殊</text>
+  </g>
+</svg>

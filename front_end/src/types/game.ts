@@ -34,6 +34,26 @@ export interface PlayerTurnMemory {
   partTimeBlockedTurns: number;
 }
 
+export interface PlayerTurnFlags {
+  rolled: boolean;
+  usedCard: boolean;
+  tileActionUsed: boolean;
+}
+
+export interface ActionCard {
+  id: string;
+  name: string;
+  type: string;
+}
+
+export interface PlayerStatus {
+  id: string;
+  name: string;
+  duration: number;
+  sourceCardId?: string;
+  effects?: Record<string, unknown>;
+}
+
 export interface Player {
   id: string;
   name: string;
@@ -50,10 +70,11 @@ export interface Player {
   cognition: number;
   savingGoal?: SavingGoal;
   deposits: unknown[];
-  handCards: unknown[];
-  statuses: unknown[];
+  handCards: ActionCard[];
+  statuses: PlayerStatus[];
   stats?: PlayerStats;
   turnMemory?: PlayerTurnMemory;
+  turnFlags?: PlayerTurnFlags;
 }
 
 export interface Tile {
@@ -72,10 +93,13 @@ export interface GameDecks {
   discardPile: unknown[];
 }
 
+export type GameStatus = "waiting" | "playing" | "finished";
+export type TurnPhase = "waiting" | "awaiting_roll" | "awaiting_action" | "finished";
+
 export interface GameState {
   gameId: string;
   roomId: string;
-  status: string;
+  status: GameStatus | string;
   round: number;
   turnIndex: number;
   currentPlayerId: string;
@@ -87,6 +111,9 @@ export interface GameState {
   decks: GameDecks;
   lastResult: TurnResult | null;
   settings: GameSettings;
+  turnPhase?: TurnPhase | string;
+  winnerPlayerId?: string | null;
+  version?: number;
 }
 
 export interface TurnResult {

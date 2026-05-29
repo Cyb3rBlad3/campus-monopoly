@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 140" role="img" aria-labelledby="title desc">
+  <title id="title">CampusMonopoly player pieces</title>
+  <desc id="desc">Four clean flat player pieces for CampusMonopoly.</desc>
+  <defs>
+    <style>
+      .shadow { fill: #c9d8d2; opacity: .45; }
+      .label { font-family: Arial, sans-serif; font-size: 18px; font-weight: 700; fill: #31433e; text-anchor: middle; }
+      .mark { fill: #fff; opacity: .95; }
+    </style>
+  </defs>
+  <rect width="520" height="140" fill="#f7fbf9"/>
+
+  <g id="player-piece-green" transform="translate(65 70)">
+    <ellipse class="shadow" cx="0" cy="43" rx="37" ry="9"/>
+    <path fill="#38b987" d="M0 -54 c31 0 54 23 54 53 0 41 -54 83 -54 83 S-54 40 -54 -1 c0 -30 23 -53 54 -53z"/>
+    <circle class="mark" cx="0" cy="-4" r="25"/>
+    <text class="label" y="3">P1</text>
+  </g>
+
+  <g id="player-piece-blue" transform="translate(195 70)">
+    <ellipse class="shadow" cx="0" cy="43" rx="37" ry="9"/>
+    <path fill="#4c94d8" d="M0 -54 c31 0 54 23 54 53 0 41 -54 83 -54 83 S-54 40 -54 -1 c0 -30 23 -53 54 -53z"/>
+    <circle class="mark" cx="0" cy="-4" r="25"/>
+    <text class="label" y="3">P2</text>
+  </g>
+
+  <g id="player-piece-yellow" transform="translate(325 70)">
+    <ellipse class="shadow" cx="0" cy="43" rx="37" ry="9"/>
+    <path fill="#f3bd42" d="M0 -54 c31 0 54 23 54 53 0 41 -54 83 -54 83 S-54 40 -54 -1 c0 -30 23 -53 54 -53z"/>
+    <circle class="mark" cx="0" cy="-4" r="25"/>
+    <text class="label" y="3">P3</text>
+  </g>
+
+  <g id="player-piece-red" transform="translate(455 70)">
+    <ellipse class="shadow" cx="0" cy="43" rx="37" ry="9"/>
+    <path fill="#e76f67" d="M0 -54 c31 0 54 23 54 53 0 41 -54 83 -54 83 S-54 40 -54 -1 c0 -30 23 -53 54 -53z"/>
+    <circle class="mark" cx="0" cy="-4" r="25"/>
+    <text class="label" y="3">P4</text>
+  </g>
+</svg>

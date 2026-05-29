@@ -21,9 +21,16 @@ export type GameMutationResponse = {
   turnResult?: TurnResult | null;
 };
 
+function isBrowserOffline(): boolean {
+  return typeof navigator !== "undefined" && navigator.onLine === false;
+}
+
 export async function apiRequest<T>(
   options: Omit<RequestOptions, "url"> & { url: string }
 ): Promise<ApiResult<T>> {
+  if (isBrowserOffline()) {
+    return { ok: false, statusCode: 0, message: "网络已断开，请检查连接" };
+  }
   const url = joinUrl(options.url);
   return new Promise((resolve) => {
     uni.request({

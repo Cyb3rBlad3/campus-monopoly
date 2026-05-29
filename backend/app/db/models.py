@@ -11,6 +11,13 @@ def utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def ensure_utc_aware(dt: datetime) -> datetime:
+    """SQLite 读回的 datetime 常为 naive，统一为 UTC aware 再比较。"""
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
+
+
 class Base(DeclarativeBase):
     pass
 
@@ -38,6 +45,8 @@ class RoomPlayerModel(Base):
     piece_color: Mapped[str | None] = mapped_column(String(32), nullable=True)
     saving_goal_type: Mapped[str] = mapped_column(String(32), default="standard")
     joined_order: Mapped[int] = mapped_column(Integer)
+    device_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
 
 

@@ -1,4 +1,10 @@
 {
+  "easycom": {
+    "autoscan": true,
+    "custom": {
+      "^OfflineBanner$": "@/components/OfflineBanner.vue"
+    }
+  },
   "pages": [
     {
       "path": "pages/index/index",

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-labelledby="title">
+  <title id="title">行动牌</title>
+  <path fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="#2c7a67" d="M36 32 h48 v56 H36 z"/>
+  <path fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="#2c7a67" d="M44 24 h48 v56 H44 z"/>
+  <path fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="#2c7a67" d="M52 16 h48 v56 H52 z"/>
+</svg>

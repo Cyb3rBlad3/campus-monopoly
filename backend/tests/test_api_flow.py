@@ -8,6 +8,9 @@ from fastapi.testclient import TestClient
 from app.db.session import configure_engine, init_db
 from app.main import app
 
+TEST_DEVICE = "dev_test_client_01"
+TEST_DEVICE_B = "dev_test_client_02"
+
 
 @pytest.fixture()
 def client(tmp_path: Path):
@@ -24,7 +27,10 @@ def create_started_game(client: TestClient) -> dict:
     room_id = room_state["roomId"]
 
     for name in ["阿明", "小夏"]:
-        join_res = client.post(f"/api/rooms/{room_id}/players", json={"name": name})
+        join_res = client.post(
+            f"/api/rooms/{room_id}/players",
+            json={"name": name, "deviceId": f"{TEST_DEVICE}_{name}"},
+        )
         assert join_res.status_code == 200
 
     start_res = client.post(f"/api/rooms/{room_id}/start", json={})
@@ -54,7 +60,10 @@ def test_room_join_start_and_get_game(client: TestClient):
 def test_cannot_start_with_one_player(client: TestClient):
     room_res = client.post("/api/rooms", json={})
     room_id = room_res.json()["roomId"]
-    join_res = client.post(f"/api/rooms/{room_id}/players", json={"name": "单人玩家"})
+    join_res = client.post(
+        f"/api/rooms/{room_id}/players",
+        json={"name": "单人玩家", "deviceId": TEST_DEVICE},
+    )
     assert join_res.status_code == 200
 
     start_res = client.post(f"/api/rooms/{room_id}/start", json={})
@@ -110,6 +119,155 @@ def test_tile_action_study_updates_growth_values(client: TestClient):
     assert acted_player["turnMemory"]["lastActionType"] == "study"
     assert payload["turnResult"]["gradeDelta"] == 8
     assert payload["turnResult"]["cognitionDelta"] == 5
+
+
+def test_duplicate_name_rejected_on_join(client: TestClient):
+    room_res = client.post("/api/rooms", json={})
+    room_id = room_res.json()["roomId"]
+    assert (
+        client.post(
+            f"/api/rooms/{room_id}/players",
+            json={"name": "阿明", "deviceId": TEST_DEVICE},
+        ).status_code
+        == 200
+    )
+    dup = client.post(
+        f"/api/rooms/{room_id}/players",
+        json={"name": "阿明", "deviceId": TEST_DEVICE_B},
+    )
+    assert dup.status_code == 409
+    assert "同名" in dup.json()["message"]
+
+
+def test_same_device_cannot_use_second_name(client: TestClient):
+    room_res = client.post("/api/rooms", json={})
+    room_id = room_res.json()["roomId"]
+    assert (
+        client.post(
+            f"/api/rooms/{room_id}/players",
+            json={"name": "阿明", "deviceId": TEST_DEVICE},
+        ).status_code
+        == 200
+    )
+    second = client.post(
+        f"/api/rooms/{room_id}/players",
+        json={"name": "小夏", "deviceId": TEST_DEVICE},
+    )
+    assert second.status_code == 409
+    assert "本设备" in second.json()["message"]
+
+
+def test_rejoin_restores_player_id(client: TestClient):
+    room_res = client.post("/api/rooms", json={})
+    room_id = room_res.json()["roomId"]
+    join_res = client.post(
+        f"/api/rooms/{room_id}/players",
+        json={"name": "小夏", "deviceId": TEST_DEVICE},
+    )
+    player_id = join_res.json()["gameState"]["players"][0]["id"]
+
+    rejoin_res = client.post(
+        f"/api/rooms/{room_id}/rejoin",
+        json={"name": "小夏", "deviceId": TEST_DEVICE},
+    )
+    assert rejoin_res.status_code == 200
+    payload = rejoin_res.json()
+    assert payload["playerId"] == player_id
+    assert payload["reconnected"] is True
+
+
+def test_inactive_player_kicked_from_waiting_room(client: TestClient):
+    from datetime import timedelta
+
+    from app.db.models import RoomPlayerModel, utc_now
+    from app.db.session import SessionLocal
+
+    room_res = client.post("/api/rooms", json={})
+    room_id = room_res.json()["roomId"]
+    join_res = client.post(
+        f"/api/rooms/{room_id}/players",
+        json={"name": "挂机玩家", "deviceId": TEST_DEVICE},
+    )
+    assert join_res.status_code == 200
+    player_id = join_res.json()["gameState"]["players"][0]["id"]
+
+    db = SessionLocal()
+    try:
+        player = db.get(RoomPlayerModel, player_id)
+        assert player is not None
+        player.last_seen_at = utc_now() - timedelta(seconds=61)
+        db.add(player)
+        db.commit()
+    finally:
+        db.close()
+
+    listed = client.get("/api/rooms", params={"status": "waiting"})
+    row = next(r for r in listed.json() if r["roomId"] == room_id)
+    assert row["playerCount"] == 0
+
+    gone = client.post(
+        f"/api/rooms/{room_id}/rejoin",
+        json={"name": "挂机玩家", "deviceId": TEST_DEVICE},
+    )
+    assert gone.status_code == 404
+
+
+def test_presence_keeps_player_in_room(client: TestClient):
+    room_res = client.post("/api/rooms", json={})
+    room_id = room_res.json()["roomId"]
+    client.post(
+        f"/api/rooms/{room_id}/players",
+        json={"name": "在线", "deviceId": TEST_DEVICE},
+    )
+    ping = client.post(
+        f"/api/rooms/{room_id}/presence",
+        json={"name": "在线", "deviceId": TEST_DEVICE},
+    )
+    assert ping.status_code == 200
+    assert ping.json()["playerId"].endswith("_p1")
+
+
+def test_waiting_room_expires_after_ttl(client: TestClient):
+    from datetime import timedelta
+
+    from app.db.models import RoomModel, utc_now
+    from app.db.session import SessionLocal
+
+    room_res = client.post("/api/rooms", json={})
+    room_id = room_res.json()["roomId"]
+
+    db = SessionLocal()
+    try:
+        room = db.get(RoomModel, room_id)
+        assert room is not None
+        room.updated_at = utc_now() - timedelta(seconds=61)
+        db.add(room)
+        db.commit()
+    finally:
+        db.close()
+
+    listed = client.get("/api/rooms")
+    assert all(row["roomId"] != room_id for row in listed.json())
+
+    missing = client.post(
+        f"/api/rooms/{room_id}/players",
+        json={"name": "玩家", "deviceId": TEST_DEVICE},
+    )
+    assert missing.status_code == 404
+
+
+def test_list_rooms_includes_waiting_room(client: TestClient):
+    room_res = client.post("/api/rooms", json={"initialAllowance": 1500})
+    room_id = room_res.json()["roomId"]
+    client.post(
+        f"/api/rooms/{room_id}/players",
+        json={"name": "玩家A", "deviceId": TEST_DEVICE},
+    )
+
+    listed = client.get("/api/rooms", params={"status": "waiting"})
+    assert listed.status_code == 200
+    rows = listed.json()
+    assert any(row["roomId"] == room_id and row["playerCount"] == 1 for row in rows)
 
 
 def test_end_turn_switches_current_player(client: TestClient):

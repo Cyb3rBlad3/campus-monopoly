@@ -13,6 +13,8 @@
 | `board_highlights.svg` | 当前地块、移动路径、当前玩家高亮素材 |
 | `tile_grid_template.svg` | 收入、支出、社交、储蓄、特殊五类地块模板 |
 
+独立地块图标（16 个）见上级目录 [`../tiles/`](../tiles/)，由 `../generate_icons.py` 从本棋盘提取并生成。
+
 ## 风格说明
 
 - 清爽扁平校园风。
@@ -28,3 +30,4 @@
 - 若前端需要单独控制棋子位置，可将 `player_pieces.svg` 中的 4 个 `g` 节点拆出为独立 SVG。
 - 若需要动态投骰，可先使用 `dice_faces.svg` 的 6 个静态分组做帧切换。
 - `board_highlights.svg` 中的高亮元素可改为 CSS 动画实现闪烁或路径流动效果。
+- 在浏览器打开 `preview.html` 可预览棋盘、骰子、地块/卡牌/状态图标总览。

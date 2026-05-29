@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 128" role="img" aria-labelledby="title">
+  <title id="title">食堂饭菜免单</title>
+  <rect width="96" height="128" rx="12" fill="#ffffff" stroke="#d2e2dc" stroke-width="3"/>
+  <rect x="0" y="0" width="96" height="18" rx="12" fill="#6dbf9a"/>
+  <rect x="0" y="10" width="96" height="8" fill="#6dbf9a"/>
+  <g transform="translate(8 28)">
+    <path fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="#2c7a67" d="M36 32 v28 M48 32 v28 M36 44 h12"/>
+    <path fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="#b98714" d="M58 48 h28 c0 14 -28 14 -28 0"/>
+  </g>
+  <text x="48" y="118" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans SC, Arial, sans-serif" font-size="11" font-weight="700" fill="#657a74">positive</text>
+</svg>

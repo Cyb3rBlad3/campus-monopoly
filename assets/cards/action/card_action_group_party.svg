@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 128" role="img" aria-labelledby="title">
+  <title id="title">发起团建聚会</title>
+  <rect width="96" height="128" rx="12" fill="#ffffff" stroke="#d2e2dc" stroke-width="3"/>
+  <rect x="0" y="0" width="96" height="18" rx="12" fill="#7eb8e8"/>
+  <rect x="0" y="10" width="96" height="8" fill="#7eb8e8"/>
+  <g transform="translate(8 28)">
+    <path fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="#4f7fb8" d="M18 52 c6 -14 20 -14 26 0 M44 52 c6 -14 20 -14 26 0"/>
+    <path fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="#4f7fb8" d="M31 30 a8 8 0 1 0 0 1 M57 30 a8 8 0 1 0 0 1"/>
+    <path fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke="#4f7fb8" d="M52 58 h18 l-6 22 H46 z"/>
+  </g>
+  <text x="48" y="118" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans SC, Arial, sans-serif" font-size="11" font-weight="700" fill="#657a74">social</text>
+</svg>
