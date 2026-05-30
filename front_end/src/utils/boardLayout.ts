@@ -1,116 +1,77 @@
-import type { Player } from "../types/game";
+import type { Player, Tile } from "../types/game";
 
-/** 与 campus_board_v2.svg viewBox 一致 */
-export const BOARD_VIEWBOX = { width: 1200, height: 900 };
+export const BOARD_TILE_COUNT = 16;
 
-/** 格子组 scale(0.78) 以棋盘中心 (600,450) 缩放后的锚点 */
-export const TILE_ANCHORS: Record<number, { x: number; y: number }> = {
-  0: { x: 256, y: 189 },
-  1: { x: 415, y: 189 },
-  2: { x: 608, y: 189 },
-  3: { x: 776, y: 189 },
-  4: { x: 943, y: 189 },
-  5: { x: 943, y: 278 },
-  6: { x: 943, y: 439 },
-  7: { x: 943, y: 563 },
-  8: { x: 943, y: 687 },
-  9: { x: 776, y: 687 },
-  10: { x: 608, y: 687 },
-  11: { x: 415, y: 687 },
-  12: { x: 256, y: 687 },
-  13: { x: 256, y: 563 },
-  14: { x: 256, y: 439 },
-  15: { x: 256, y: 278 },
+/**
+ * 5×5 棋盘格位置（1-based，对应 CSS grid-row / grid-column）。
+ * 顺时针：顶 0–4 → 右 5–8 → 底 9–12 → 左 13–15
+ *
+ *  R1:  0   1   2   3   4
+ *  R2: 15              5
+ *  R3: 14      HUB     6
+ *  R4: 13              7
+ *  R5: 12  11  10   9   8
+ */
+export const TILE_GRID_CELL: Record<number, { row: number; col: number }> = {
+  0: { row: 1, col: 1 },
+  1: { row: 1, col: 2 },
+  2: { row: 1, col: 3 },
+  3: { row: 1, col: 4 },
+  4: { row: 1, col: 5 },
+  5: { row: 2, col: 5 },
+  6: { row: 3, col: 5 },
+  7: { row: 4, col: 5 },
+  8: { row: 5, col: 5 },
+  9: { row: 5, col: 4 },
+  10: { row: 5, col: 3 },
+  11: { row: 5, col: 2 },
+  12: { row: 5, col: 1 },
+  13: { row: 4, col: 1 },
+  14: { row: 3, col: 1 },
+  15: { row: 2, col: 1 },
 };
 
-/** 棋盘中央信息区（百分比，相对 board-wrap） */
-export const CENTER_HUB_RECT = {
-  left: 24,
-  top: 29,
-  width: 52,
-  height: 42,
+export const TILE_TYPE_CLASS: Record<string, string> = {
+  income: "tile--income",
+  expense: "tile--expense",
+  social: "tile--social",
+  saving: "tile--saving",
+  special: "tile--special",
 };
 
-const STACK_OFFSETS: Record<number, [number, number][]> = {
-  2: [
-    [-20, 0],
-    [20, 0],
-  ],
-  3: [
-    [-22, -6],
-    [22, -6],
-    [0, 14],
-  ],
-  4: [
-    [-20, -10],
-    [20, -10],
-    [-20, 12],
-    [20, 12],
-  ],
-};
-
-export function getStackOffset(
-  index: number,
-  total: number
-): { dx: number; dy: number } {
-  if (total <= 1) return { dx: 0, dy: 0 };
-  const preset = STACK_OFFSETS[Math.min(total, 4)] ?? STACK_OFFSETS[4];
-  const [dx, dy] = preset[index % preset.length];
-  return { dx, dy };
+export function normalizeBoardPosition(position: number): number {
+  if (!Number.isFinite(position)) return 0;
+  const n = Math.trunc(position);
+  return ((n % BOARD_TILE_COUNT) + BOARD_TILE_COUNT) % BOARD_TILE_COUNT;
 }
 
-export function anchorToPercent(x: number, y: number): { left: string; top: string } {
+export function tileGridStyle(position: number): Record<string, string | number> {
+  const cell = TILE_GRID_CELL[normalizeBoardPosition(position)];
+  if (!cell) return {};
   return {
-    left: `${(x / BOARD_VIEWBOX.width) * 100}%`,
-    top: `${(y / BOARD_VIEWBOX.height) * 100}%`,
+    gridRow: cell.row,
+    gridColumn: cell.col,
   };
 }
 
-export interface PlayerMarkerLayout {
-  player: Player;
-  stackIndex: number;
-  stackTotal: number;
-  style: {
-    left: string;
-    top: string;
-    zIndex: number;
-  };
+export function groupPlayersByTile(players: Player[]): Map<number, Player[]> {
+  const map = new Map<number, Player[]>();
+  for (const player of players) {
+    if (player.bankrupt) continue;
+    const pos = normalizeBoardPosition(player.position);
+    const list = map.get(pos) ?? [];
+    list.push(player);
+    map.set(pos, list);
+  }
+  for (const [, list] of map) {
+    list.sort((a, b) => a.id.localeCompare(b.id));
+  }
+  return map;
 }
 
-export function buildPlayerMarkers(players: Player[]): PlayerMarkerLayout[] {
-  const active = players.filter((p) => !p.bankrupt);
-  const byTile = new Map<number, Player[]>();
-
-  for (const player of active) {
-    const group = byTile.get(player.position) ?? [];
-    group.push(player);
-    byTile.set(player.position, group);
-  }
-
-  const markers: PlayerMarkerLayout[] = [];
-
-  for (const [position, group] of byTile) {
-    const anchor = TILE_ANCHORS[position];
-    if (!anchor) continue;
-
-    const sorted = [...group].sort((a, b) => a.id.localeCompare(b.id));
-    sorted.forEach((player, index) => {
-      const { dx, dy } = getStackOffset(index, sorted.length);
-      const pct = anchorToPercent(anchor.x + dx, anchor.y + dy);
-      markers.push({
-        player,
-        stackIndex: index,
-        stackTotal: sorted.length,
-        style: {
-          left: pct.left,
-          top: pct.top,
-          zIndex: 10 + index,
-        },
-      });
-    });
-  }
-
-  return markers;
+export function getTileByPosition(board: Tile[], position: number): Tile | undefined {
+  const pos = normalizeBoardPosition(position);
+  return board.find((t) => t.position === pos) ?? board[pos];
 }
 
 export const DEFAULT_PIECE_COLORS = [
@@ -128,4 +89,10 @@ export function resolvePieceColor(player: Player, playerIndex: number): string {
 export function playerInitial(name: string): string {
   const trimmed = name.trim();
   return trimmed ? trimmed.charAt(0) : "?";
+}
+
+/** 同格多人时的 flex 偏移 class */
+export function pieceStackClass(index: number, total: number): string {
+  if (total <= 1) return "";
+  return `piece--stack-${Math.min(total, 4)}-${index + 1}`;
 }

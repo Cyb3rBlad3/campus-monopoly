@@ -16,34 +16,14 @@
 
       <view class="game-body">
         <view class="board-pane">
-          <view class="board-wrap">
-            <image
-              class="board-img"
-              src="/static/board/campus_board_v2.svg"
-              mode="aspectFit"
-            />
-            <view class="board-overlay">
-              <BoardCenterPlayers
-                :players="gameState.players"
-                :round="gameState.round"
-                :public-reserve="gameState.publicReserve"
-                :current-player-id="gameState.currentPlayerId"
-                :local-player-id="session.localPlayerId"
-              />
-              <PlayerPieceMarker
-                v-for="marker in playerMarkers"
-                :key="marker.player.id"
-                :player="marker.player"
-                :color="marker.color"
-                :position-style="marker.style"
-                :is-current="marker.player.id === gameState.currentPlayerId"
-                :is-me="marker.player.id === session.localPlayerId"
-                :stack-index="marker.stackIndex"
-                :stack-total="marker.stackTotal"
-                :show-name="false"
-              />
-            </view>
-          </view>
+          <ComposedBoard
+            :board="gameState.board"
+            :players="gameState.players"
+            :round="gameState.round"
+            :public-reserve="gameState.publicReserve"
+            :current-player-id="gameState.currentPlayerId"
+            :local-player-id="session.localPlayerId"
+          />
         </view>
 
         <scroll-view
@@ -134,13 +114,8 @@ import { useGameStore } from "../../stores/game";
 import { useNetworkStore } from "../../stores/network";
 import { useGamePlay } from "../../composables/useGamePlay";
 import { useRoomSession } from "../../composables/useRoomSession";
-import BoardCenterPlayers from "../../components/BoardCenterPlayers.vue";
-import PlayerPieceMarker from "../../components/PlayerPieceMarker.vue";
+import ComposedBoard from "../../components/ComposedBoard.vue";
 import { TILE_ACTION_LABELS } from "../../utils/gameLabels";
-import {
-  buildPlayerMarkers,
-  resolvePieceColor,
-} from "../../utils/boardLayout";
 
 const session = useSessionStore();
 const game = useGameStore();
@@ -163,19 +138,6 @@ const {
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 let presenceTimer: ReturnType<typeof setInterval> | null = null;
 const PRESENCE_INTERVAL_MS = 20_000;
-
-const playerMarkers = computed(() => {
-  const gs = gameState.value;
-  if (!gs) return [];
-  const layouts = buildPlayerMarkers(gs.players);
-  return layouts.map((layout) => {
-    const playerIndex = gs.players.findIndex((p) => p.id === layout.player.id);
-    return {
-      ...layout,
-      color: resolvePieceColor(layout.player, playerIndex),
-    };
-  });
-});
 
 const phaseLabel = computed(() => {
   const gs = gameState.value;
@@ -374,31 +336,8 @@ onUnmounted(() => {
 .board-pane {
   flex: 1;
   min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.board-wrap {
-  position: relative;
-  height: 100%;
-  width: auto;
-  max-width: 100%;
-  aspect-ratio: 1200 / 900;
-  margin: 0 auto;
-  border-radius: 12rpx;
-  overflow: hidden;
-  background: #fff;
-  box-shadow: 0 2rpx 12rpx rgba(23, 58, 53, 0.06);
-}
-.board-img {
   width: 100%;
-  height: 100%;
-  display: block;
-}
-.board-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+  overflow: hidden;
 }
 .control-pane {
   flex-shrink: 0;

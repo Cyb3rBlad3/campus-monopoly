@@ -1,5 +1,5 @@
 <template>
-  <view class="center-hub" :style="hubStyle">
+  <view class="center-hub" :class="{ 'center-hub--large': isLargeScreen }">
     <view class="hub-header">
       <text class="hub-meta">第 {{ round }} 回合</text>
       <text class="hub-meta">储备 ¥{{ publicReserve }}</text>
@@ -42,13 +42,9 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { CSSProperties } from "vue";
 import type { Player } from "../types/game";
-import {
-  CENTER_HUB_RECT,
-  playerInitial,
-  resolvePieceColor,
-} from "../utils/boardLayout";
+import { playerInitial, resolvePieceColor } from "../utils/boardLayout";
+import { useLargeScreen } from "../composables/useLargeScreen";
 
 const props = defineProps<{
   players: Player[];
@@ -58,14 +54,7 @@ const props = defineProps<{
   localPlayerId: string;
 }>();
 
-const hubStyle = computed(
-  (): CSSProperties => ({
-    left: `${CENTER_HUB_RECT.left}%`,
-    top: `${CENTER_HUB_RECT.top}%`,
-    width: `${CENTER_HUB_RECT.width}%`,
-    height: `${CENTER_HUB_RECT.height}%`,
-  })
-);
+const { isLargeScreen } = useLargeScreen();
 
 const playerItems = computed(() =>
   props.players.map((player, index) => ({
@@ -86,17 +75,17 @@ const gridClass = computed(() => {
 
 <style scoped>
 .center-hub {
-  position: absolute;
   box-sizing: border-box;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   padding: 6rpx 8rpx;
-  border-radius: 20rpx;
-  background: rgba(255, 255, 255, 0.92);
+  border-radius: 12rpx;
+  background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(136, 201, 170, 0.55);
-  box-shadow: 0 4rpx 16rpx rgba(23, 58, 53, 0.08);
+  box-shadow: 0 2rpx 10rpx rgba(23, 58, 53, 0.06);
   overflow: hidden;
-  pointer-events: none;
 }
 .hub-header {
   display: flex;
@@ -129,7 +118,7 @@ const gridClass = computed(() => {
 .hub-card {
   min-width: 0;
   padding: 4rpx 6rpx;
-  border-radius: 10rpx;
+  border-radius: 8rpx;
   background: rgba(245, 250, 248, 0.95);
   border: 1px solid rgba(210, 226, 220, 0.9);
   overflow: hidden;
@@ -212,5 +201,59 @@ const gridClass = computed(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.center-hub--large {
+  padding: 10rpx 14rpx;
+}
+.center-hub--large .hub-meta {
+  font-size: 24rpx;
+}
+.center-hub--large .mini-piece {
+  width: 36rpx;
+  height: 36rpx;
+}
+.center-hub--large .mini-initial {
+  font-size: 20rpx;
+}
+.center-hub--large .hub-name {
+  font-size: 26rpx;
+}
+.center-hub--large .hub-tag {
+  font-size: 18rpx;
+}
+.center-hub--large .hub-stat {
+  font-size: 22rpx;
+}
+.center-hub--large .hub-sub {
+  font-size: 19rpx;
+}
+
+@media (min-width: 768px) {
+  .center-hub {
+    padding: 10rpx 14rpx;
+  }
+  .hub-meta {
+    font-size: 24rpx;
+  }
+  .mini-piece {
+    width: 36rpx;
+    height: 36rpx;
+  }
+  .mini-initial {
+    font-size: 20rpx;
+  }
+  .hub-name {
+    font-size: 26rpx;
+  }
+  .hub-tag {
+    font-size: 18rpx;
+  }
+  .hub-stat {
+    font-size: 22rpx;
+  }
+  .hub-sub {
+    font-size: 19rpx;
+  }
 }
 </style>
