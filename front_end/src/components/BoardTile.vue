@@ -81,7 +81,7 @@ const playerItems = computed(() =>
   min-width: 0;
   min-height: 0;
   height: 100%;
-  padding: 4rpx 2rpx 6rpx;
+  padding: 5rpx 3rpx 6rpx;
   border-radius: 10rpx;
   border: 2rpx solid #d2e2dc;
   overflow: hidden;
@@ -106,9 +106,11 @@ const playerItems = computed(() =>
   background: #f5efff;
 }
 .tile-icon {
-  width: 45rpx;
-  height: 45rpx;
+  width: 58rpx;
+  height: 58rpx;
   flex-shrink: 0;
+  transform: translateX(-5%) scale(1.08);
+  transform-origin: center;
 }
 .tile-name {
   font-size: 16rpx;
@@ -116,7 +118,7 @@ const playerItems = computed(() =>
   color: #183934;
   text-align: center;
   line-height: 1.15;
-  margin-top: 2rpx;
+  margin-top: 3rpx;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -126,6 +128,7 @@ const playerItems = computed(() =>
   font-size: 14rpx;
   color: #c62828;
   line-height: 1.1;
+  margin-top: 1rpx;
 }
 .tile-pieces {
   margin-top: auto;
@@ -190,15 +193,19 @@ const playerItems = computed(() =>
 .piece--stack-4-4 {
   transform: translate(4rpx, 3rpx);
 }
+.board-tile--large {
+  padding: 8rpx 6rpx 8rpx;
+}
 .board-tile--large .tile-icon {
-  width: 55rpx;
-  height: 55rpx;
+  width: 118rpx;
+  height: 118rpx;
+  transform: translateX(-5%) scale(1.16);
 }
 .board-tile--large .tile-name {
-  font-size: 20rpx;
+  font-size: 22rpx;
 }
 .board-tile--large .tile-cost {
-  font-size: 16rpx;
+  font-size: 18rpx;
 }
 .board-tile--large .tile-piece {
   width: 32rpx;

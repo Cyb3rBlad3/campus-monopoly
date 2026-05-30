@@ -456,5 +456,41 @@ onUnmounted(() => {
     max-height: none;
     min-height: 0;
   }
+  .control-inner {
+    padding: 8px 4px 12px 8px;
+  }
+  .log-title {
+    font-size: 17px;
+  }
+  .log-line {
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  .actions-title {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  .group-label {
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+  .btn {
+    font-size: 16px;
+    margin-top: 8px;
+  }
+  .hint {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .result-title {
+    font-size: 20px;
+  }
+  .result-winner {
+    font-size: 17px;
+  }
+  .log-card,
+  .actions {
+    padding: 14px 16px;
+  }
 }
 </style>

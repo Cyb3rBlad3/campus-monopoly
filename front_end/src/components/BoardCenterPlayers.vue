@@ -204,56 +204,73 @@ const gridClass = computed(() => {
 }
 
 .center-hub--large {
-  padding: 10rpx 14rpx;
+  padding: 8px 10px;
 }
 .center-hub--large .hub-meta {
-  font-size: 24rpx;
+  font-size: 16px;
 }
 .center-hub--large .mini-piece {
-  width: 36rpx;
-  height: 36rpx;
+  width: 34px;
+  height: 34px;
 }
 .center-hub--large .mini-initial {
-  font-size: 20rpx;
+  font-size: 15px;
 }
 .center-hub--large .hub-name {
-  font-size: 26rpx;
+  font-size: 20px;
 }
 .center-hub--large .hub-tag {
-  font-size: 18rpx;
+  font-size: 13px;
+  padding: 2px 7px;
 }
 .center-hub--large .hub-stat {
-  font-size: 22rpx;
+  font-size: 17px;
 }
 .center-hub--large .hub-sub {
-  font-size: 19rpx;
+  font-size: 15px;
+  white-space: normal;
 }
 
 @media (min-width: 768px) {
   .center-hub {
-    padding: 10rpx 14rpx;
+    padding: 10px 12px;
+  }
+  .hub-header {
+    padding-bottom: 6px;
+    margin-bottom: 2px;
   }
   .hub-meta {
-    font-size: 24rpx;
+    font-size: 16px;
   }
   .mini-piece {
-    width: 36rpx;
-    height: 36rpx;
+    width: 34px;
+    height: 34px;
   }
   .mini-initial {
-    font-size: 20rpx;
+    font-size: 15px;
   }
   .hub-name {
-    font-size: 26rpx;
+    font-size: 20px;
   }
   .hub-tag {
-    font-size: 18rpx;
+    font-size: 13px;
+    padding: 2px 7px;
   }
   .hub-stat {
-    font-size: 22rpx;
+    font-size: 17px;
+    margin-top: 4px;
   }
   .hub-sub {
-    font-size: 19rpx;
+    font-size: 15px;
+    line-height: 1.35;
+    white-space: normal;
+  }
+  .hub-card {
+    padding: 6px 8px;
+  }
+  .hub-grid {
+    gap: 6px;
+    padding-top: 6px;
   }
 }
 </style>
