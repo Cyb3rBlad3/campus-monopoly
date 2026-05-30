@@ -60,10 +60,14 @@ export const useGameStore = defineStore("game", () => {
     return false;
   }
 
-  async function startGame(roomId: string): Promise<boolean> {
+  async function startGame(
+    roomId: string,
+    playerId: string,
+    deviceId: string
+  ): Promise<boolean> {
     loading.value = true;
     errorMessage.value = "";
-    const res = await startRoom(roomId, {});
+    const res = await startRoom(roomId, { playerId, deviceId });
     loading.value = false;
     return applyMutation(res);
   }

@@ -33,7 +33,10 @@ def create_started_game(client: TestClient) -> dict:
         )
         assert join_res.status_code == 200
 
-    start_res = client.post(f"/api/rooms/{room_id}/start", json={})
+    start_res = client.post(
+        f"/api/rooms/{room_id}/start",
+        json={"playerId": f"{room_id}_p1", "deviceId": f"{TEST_DEVICE}_阿明"},
+    )
     assert start_res.status_code == 200
     return start_res.json()["gameState"]
 
@@ -66,9 +69,49 @@ def test_cannot_start_with_one_player(client: TestClient):
     )
     assert join_res.status_code == 200
 
-    start_res = client.post(f"/api/rooms/{room_id}/start", json={})
+    start_res = client.post(
+        f"/api/rooms/{room_id}/start",
+        json={"playerId": f"{room_id}_p1", "deviceId": TEST_DEVICE},
+    )
     assert start_res.status_code == 400
     assert "至少需要 2 名玩家" in start_res.json()["message"]
+
+
+def test_only_room_creator_can_start(client: TestClient):
+    room_res = client.post("/api/rooms", json={})
+    room_id = room_res.json()["roomId"]
+    for name in ["房主", "路人"]:
+        join_res = client.post(
+            f"/api/rooms/{room_id}/players",
+            json={"name": name, "deviceId": f"{TEST_DEVICE}_{name}"},
+        )
+        assert join_res.status_code == 200
+
+    denied = client.post(
+        f"/api/rooms/{room_id}/start",
+        json={"playerId": f"{room_id}_p2", "deviceId": f"{TEST_DEVICE}_路人"},
+    )
+    assert denied.status_code == 403
+    assert "只有创建房间的玩家可以开始游戏" in denied.json()["message"]
+
+    allowed = client.post(
+        f"/api/rooms/{room_id}/start",
+        json={"playerId": f"{room_id}_p1", "deviceId": f"{TEST_DEVICE}_房主"},
+    )
+    assert allowed.status_code == 200
+    assert allowed.json()["gameState"]["status"] == "playing"
+
+
+def test_first_joiner_is_room_creator(client: TestClient):
+    room_res = client.post("/api/rooms", json={})
+    room_id = room_res.json()["roomId"]
+    join_res = client.post(
+        f"/api/rooms/{room_id}/players",
+        json={"name": "房主", "deviceId": TEST_DEVICE},
+    )
+    assert join_res.status_code == 200
+    state = join_res.json()["gameState"]
+    assert state["creatorPlayerId"] == f"{room_id}_p1"
 
 
 def test_roll_updates_position_hand_and_last_result(client: TestClient):
@@ -230,6 +273,7 @@ def test_presence_keeps_player_in_room(client: TestClient):
 def test_waiting_room_expires_after_ttl(client: TestClient):
     from datetime import timedelta
 
+    from app.core.room_policy import WAITING_ROOM_TTL_SECONDS
     from app.db.models import RoomModel, utc_now
     from app.db.session import SessionLocal
 
@@ -240,7 +284,7 @@ def test_waiting_room_expires_after_ttl(client: TestClient):
     try:
         room = db.get(RoomModel, room_id)
         assert room is not None
-        room.updated_at = utc_now() - timedelta(seconds=61)
+        room.updated_at = utc_now() - timedelta(seconds=WAITING_ROOM_TTL_SECONDS + 1)
         db.add(room)
         db.commit()
     finally:

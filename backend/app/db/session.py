@@ -67,6 +67,11 @@ def init_db() -> None:
         "last_seen_at",
         "ALTER TABLE room_players ADD COLUMN last_seen_at DATETIME",
     )
+    _sqlite_add_column_if_missing(
+        "rooms",
+        "creator_player_id",
+        "ALTER TABLE rooms ADD COLUMN creator_player_id VARCHAR(64)",
+    )
 
 
 def get_db():

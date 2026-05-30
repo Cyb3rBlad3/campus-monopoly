@@ -7,136 +7,120 @@
       <button class="btn" @click="goRoom">返回房间</button>
     </view>
 
-    <template v-else>
+    <view v-else class="game-shell">
       <view class="top-bar">
         <text class="round">第 {{ gameState.round }} 回合</text>
         <text class="phase">{{ phaseLabel }}</text>
         <button class="btn-mini" :loading="game.loading" @click="onRefresh">刷新</button>
       </view>
 
-      <image
-        class="board-img"
-        src="/static/board/campus_board_v2.svg"
-        mode="widthFix"
-      />
-
-      <scroll-view scroll-x class="tile-strip">
-        <view
-          v-for="tile in sortedBoard"
-          :key="tile.id"
-          class="tile-chip"
-          :class="{
-            current: currentTile?.id === tile.id,
-            landed: playersOnTile(tile.position).length > 0,
-          }"
-        >
-          <image
-            v-if="tile.icon"
-            class="tile-icon"
-            :src="tileIconPath(tile.icon)"
-            mode="aspectFit"
-          />
-          <text class="tile-name">{{ tile.name }}</text>
-          <text v-if="tile.cost > 0" class="tile-cost">¥{{ tile.cost }}</text>
-          <view class="pieces">
-            <view
-              v-for="p in playersOnTile(tile.position)"
-              :key="p.id"
-              class="piece-dot"
-              :style="{ background: p.pieceColor || '#2e7d32' }"
+      <view class="game-body">
+        <view class="board-pane">
+          <view class="board-wrap">
+            <image
+              class="board-img"
+              src="/static/board/campus_board_v2.svg"
+              mode="aspectFit"
             />
+            <view class="board-overlay">
+              <BoardCenterPlayers
+                :players="gameState.players"
+                :round="gameState.round"
+                :public-reserve="gameState.publicReserve"
+                :current-player-id="gameState.currentPlayerId"
+                :local-player-id="session.localPlayerId"
+              />
+              <PlayerPieceMarker
+                v-for="marker in playerMarkers"
+                :key="marker.player.id"
+                :player="marker.player"
+                :color="marker.color"
+                :position-style="marker.style"
+                :is-current="marker.player.id === gameState.currentPlayerId"
+                :is-me="marker.player.id === session.localPlayerId"
+                :stack-index="marker.stackIndex"
+                :stack-total="marker.stackTotal"
+                :show-name="false"
+              />
+            </view>
           </view>
         </view>
-      </scroll-view>
 
-      <view class="players-panel">
-        <view
-          v-for="p in gameState.players"
-          :key="p.id"
-          class="player-card"
-          :class="{
-            current: p.id === gameState.currentPlayerId,
-            me: p.id === session.localPlayerId,
-            bankrupt: p.bankrupt,
-          }"
+        <scroll-view
+          scroll-y
+          class="control-pane"
+          :show-scrollbar="false"
+          :enhanced="true"
         >
-          <text class="p-name">{{ p.name }}</text>
-          <text v-if="p.id === session.localPlayerId" class="badge">我</text>
-          <text v-if="p.id === gameState.currentPlayerId" class="badge turn">回合</text>
-          <text class="stat">¥{{ p.money }} · 格{{ p.position + 1 }}</text>
-          <text class="stat sub">社交{{ p.socialValue }} 理财{{ p.financeValue }}</text>
-          <text class="stat sub">心情{{ p.mood }} 精力{{ p.energy }} 成绩{{ p.grade }}</text>
-          <text v-if="p.handCards?.length" class="stat sub">手牌 {{ p.handCards.length }} 张</text>
-        </view>
+          <view class="control-inner">
+            <view v-if="lastMessages.length" class="log-card">
+              <text class="log-title">本回合动态</text>
+              <text v-for="(m, i) in lastMessages" :key="i" class="log-line">{{ m }}</text>
+            </view>
+
+            <view v-if="gameState.status === 'playing'" class="actions">
+              <text class="actions-title">
+                {{ isMyTurn ? "你的回合" : `等待 ${currentPlayer?.name ?? "其他玩家"}` }}
+              </text>
+
+              <button
+                v-if="canRoll"
+                class="btn primary"
+                :disabled="game.loading"
+                @click="onRoll"
+              >
+                投掷骰子
+              </button>
+
+              <view v-if="canTileAction && currentTile?.actions?.length" class="action-group">
+                <text class="group-label">地块行动（{{ currentTile.name }}）</text>
+                <button
+                  v-for="act in currentTile.actions"
+                  :key="act"
+                  class="btn secondary"
+                  :disabled="game.loading"
+                  @click="onTileAction(act)"
+                >
+                  {{ tileActionLabel(act) }}
+                </button>
+              </view>
+
+              <view v-if="canUseCard && playableCards.length" class="action-group">
+                <text class="group-label">使用行动牌（每回合 1 张）</text>
+                <button
+                  v-for="card in playableCards"
+                  :key="card.id"
+                  class="btn secondary"
+                  :disabled="game.loading"
+                  @click="onUseCard(card.id)"
+                >
+                  {{ card.name }}
+                </button>
+              </view>
+
+              <button
+                v-if="canEndTurn"
+                class="btn ghost"
+                :disabled="game.loading"
+                @click="onEndTurn"
+              >
+                结束回合
+              </button>
+
+              <text v-if="isMyTurn && localPlayer?.turnFlags?.rolled" class="hint">
+                流程：已掷骰后可执行地块行动、使用行动牌，最后结束回合。
+              </text>
+            </view>
+
+            <view v-if="gameState.status === 'finished'" class="result-card">
+              <text class="result-title">对局结束</text>
+              <text class="result-winner">获胜：{{ winnerName }}</text>
+              <button class="btn primary" @click="goRoom">返回房间</button>
+            </view>
+          </view>
+        </scroll-view>
       </view>
-
-      <view v-if="lastMessages.length" class="log-card">
-        <text class="log-title">本回合动态</text>
-        <text v-for="(m, i) in lastMessages" :key="i" class="log-line">{{ m }}</text>
-      </view>
-
-      <view v-if="gameState.status === 'playing'" class="actions">
-        <text class="actions-title">
-          {{ isMyTurn ? "你的回合" : `等待 ${currentPlayer?.name ?? "其他玩家"}` }}
-        </text>
-
-        <button
-          v-if="canRoll"
-          class="btn primary"
-          :disabled="game.loading"
-          @click="onRoll"
-        >
-          投掷骰子
-        </button>
-
-        <view v-if="canTileAction && currentTile?.actions?.length" class="action-group">
-          <text class="group-label">地块行动（{{ currentTile.name }}）</text>
-          <button
-            v-for="act in currentTile.actions"
-            :key="act"
-            class="btn secondary"
-            :disabled="game.loading"
-            @click="onTileAction(act)"
-          >
-            {{ tileActionLabel(act) }}
-          </button>
-        </view>
-
-        <view v-if="canUseCard && playableCards.length" class="action-group">
-          <text class="group-label">使用行动牌（每回合 1 张）</text>
-          <button
-            v-for="card in playableCards"
-            :key="card.id"
-            class="btn secondary"
-            :disabled="game.loading"
-            @click="onUseCard(card.id)"
-          >
-            {{ card.name }}
-          </button>
-        </view>
-
-        <button
-          v-if="canEndTurn"
-          class="btn ghost"
-          :disabled="game.loading"
-          @click="onEndTurn"
-        >
-          结束回合
-        </button>
-
-        <text v-if="isMyTurn && localPlayer?.turnFlags?.rolled" class="hint">
-          流程：已掷骰后可执行地块行动、使用行动牌，最后结束回合。
-        </text>
-      </view>
-
-      <view v-if="gameState.status === 'finished'" class="result-card">
-        <text class="result-title">对局结束</text>
-        <text class="result-winner">
-          获胜：{{ winnerName }}
-        </text>
-        <button class="btn primary" @click="goRoom">返回房间</button>
-      </view>
-    </template>
+    </view>
 
     <view v-if="game.errorMessage" class="err">{{ game.errorMessage }}</view>
   </view>
@@ -150,11 +134,13 @@ import { useGameStore } from "../../stores/game";
 import { useNetworkStore } from "../../stores/network";
 import { useGamePlay } from "../../composables/useGamePlay";
 import { useRoomSession } from "../../composables/useRoomSession";
+import BoardCenterPlayers from "../../components/BoardCenterPlayers.vue";
+import PlayerPieceMarker from "../../components/PlayerPieceMarker.vue";
+import { TILE_ACTION_LABELS } from "../../utils/gameLabels";
 import {
-  TILE_ACTION_LABELS,
-  tileIconPath,
-} from "../../utils/gameLabels";
-import type { Player } from "../../types/game";
+  buildPlayerMarkers,
+  resolvePieceColor,
+} from "../../utils/boardLayout";
 
 const session = useSessionStore();
 const game = useGameStore();
@@ -178,10 +164,17 @@ let pollTimer: ReturnType<typeof setInterval> | null = null;
 let presenceTimer: ReturnType<typeof setInterval> | null = null;
 const PRESENCE_INTERVAL_MS = 20_000;
 
-const sortedBoard = computed(() => {
+const playerMarkers = computed(() => {
   const gs = gameState.value;
   if (!gs) return [];
-  return [...gs.board].sort((a, b) => a.position - b.position);
+  const layouts = buildPlayerMarkers(gs.players);
+  return layouts.map((layout) => {
+    const playerIndex = gs.players.findIndex((p) => p.id === layout.player.id);
+    return {
+      ...layout,
+      color: resolvePieceColor(layout.player, playerIndex),
+    };
+  });
 });
 
 const phaseLabel = computed(() => {
@@ -204,12 +197,6 @@ const winnerName = computed(() => {
   if (!gs?.winnerPlayerId) return "—";
   return gs.players.find((p) => p.id === gs.winnerPlayerId)?.name ?? "—";
 });
-
-function playersOnTile(position: number): Player[] {
-  const gs = gameState.value;
-  if (!gs) return [];
-  return gs.players.filter((p) => !p.bankrupt && p.position === position);
-}
 
 function tileActionLabel(action: string): string {
   return TILE_ACTION_LABELS[action] ?? action;
@@ -329,7 +316,9 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  padding: 16rpx;
+  height: 100dvh;
+  padding: 12rpx;
+  padding-bottom: calc(12rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
   background: #f5faf6;
   overflow: hidden;
@@ -339,12 +328,18 @@ onUnmounted(() => {
   text-align: center;
   color: #616161;
 }
+.game-shell {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
 .top-bar {
   display: flex;
   align-items: center;
   gap: 12rpx;
   flex-shrink: 0;
-  margin-bottom: 12rpx;
+  margin-bottom: 8rpx;
 }
 .round {
   font-size: 26rpx;
@@ -355,6 +350,9 @@ onUnmounted(() => {
   flex: 1;
   font-size: 24rpx;
   color: #558b2f;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .btn-mini {
   font-size: 22rpx;
@@ -364,164 +362,58 @@ onUnmounted(() => {
   color: #2e7d32;
   border: 1px solid #a5d6a7;
   border-radius: 8rpx;
-}
-.game-main {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  gap: 12rpx;
-}
-.board-column {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-.board-wrap {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fff;
-  border-radius: 12rpx;
-  overflow: hidden;
-}
-.board-img {
-  width: 100%;
-  height: 100%;
-}
-.tile-strip {
-  flex-shrink: 0;
-  height: 130rpx;
-  margin-top: 10rpx;
-  white-space: nowrap;
-}
-.tile-strip-inner {
-  display: inline-flex;
-  padding: 4rpx 0;
-}
-.tile-chip {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  width: 96rpx;
-  margin-right: 8rpx;
-  padding: 8rpx;
-  background: #fff;
-  border-radius: 10rpx;
-  border: 2px solid #e0e0e0;
   flex-shrink: 0;
 }
-.tile-chip.current {
-  border-color: #2e7d32;
-  background: #e8f5e9;
-}
-.tile-icon {
-  width: 40rpx;
-  height: 40rpx;
-}
-.tile-name {
-  font-size: 18rpx;
-  color: #212121;
-  margin-top: 4rpx;
-  white-space: normal;
-  text-align: center;
-  line-height: 1.2;
-}
-.tile-cost {
-  font-size: 16rpx;
-  color: #c62828;
-}
-.pieces {
-  display: flex;
-  gap: 4rpx;
-  margin-top: 4rpx;
-  min-height: 12rpx;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-.piece-dot {
-  width: 12rpx;
-  height: 12rpx;
-  border-radius: 50%;
-  border: 1px solid #fff;
-}
-.players-column {
-  width: 220rpx;
-  flex-shrink: 0;
-  height: 100%;
-}
-.players-panel {
+.game-body {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 8rpx;
 }
-.player-card {
-  background: #fff;
-  border-radius: 10rpx;
-  padding: 12rpx;
-  border: 1px solid #e0e0e0;
-}
-.player-card.current {
-  border-color: #ffb74d;
-}
-.player-card.me {
-  border-left: 4rpx solid #2e7d32;
-}
-.player-card.bankrupt {
-  opacity: 0.5;
-}
-.p-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 4rpx;
-}
-.p-name {
-  font-size: 24rpx;
-  font-weight: 700;
-  color: #212121;
+.board-pane {
   flex: 1;
-  line-height: 1.2;
-}
-.p-badges {
+  min-height: 0;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2rpx;
-  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
 }
-.badge {
-  font-size: 18rpx;
-  color: #2e7d32;
-  line-height: 1.2;
+.board-wrap {
+  position: relative;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  aspect-ratio: 1200 / 900;
+  margin: 0 auto;
+  border-radius: 12rpx;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2rpx 12rpx rgba(23, 58, 53, 0.06);
 }
-.badge.turn {
-  color: #ef6c00;
-}
-.stat {
+.board-img {
+  width: 100%;
+  height: 100%;
   display: block;
-  font-size: 20rpx;
-  color: #424242;
-  margin-top: 4rpx;
-  line-height: 1.3;
 }
-.stat.sub {
-  font-size: 18rpx;
-  color: #757575;
+.board-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
-.bottom-panel {
+.control-pane {
   flex-shrink: 0;
-  max-height: 38vh;
-  margin-top: 10rpx;
+  height: 32vh;
+  max-height: 420rpx;
+  min-height: 160rpx;
+}
+.control-inner {
+  padding-bottom: 8rpx;
 }
 .log-card {
   background: #fff;
   border-radius: 10rpx;
-  padding: 12rpx 16rpx;
-  margin-bottom: 10rpx;
+  padding: 10rpx 14rpx;
+  margin-bottom: 8rpx;
   border: 1px solid #e0e0e0;
 }
 .log-title {
@@ -535,13 +427,13 @@ onUnmounted(() => {
   display: block;
   font-size: 20rpx;
   color: #424242;
-  line-height: 1.4;
+  line-height: 1.35;
   margin-top: 2rpx;
 }
 .actions {
   background: #fff;
   border-radius: 12rpx;
-  padding: 16rpx;
+  padding: 12rpx 14rpx;
   border: 1px solid #c8e6c9;
 }
 .actions-title {
@@ -549,21 +441,22 @@ onUnmounted(() => {
   font-size: 24rpx;
   font-weight: 700;
   color: #1b5e20;
-  margin-bottom: 10rpx;
+  margin-bottom: 8rpx;
 }
 .action-group {
-  margin-bottom: 8rpx;
+  margin-bottom: 6rpx;
 }
 .group-label {
   display: block;
   font-size: 22rpx;
   color: #616161;
-  margin-bottom: 6rpx;
+  margin-bottom: 4rpx;
 }
 .btn {
-  margin-top: 8rpx;
+  margin-top: 6rpx;
   border-radius: 10rpx;
   font-size: 26rpx;
+  line-height: 1.4;
 }
 .btn.primary {
   background-color: #2e7d32;
@@ -582,13 +475,13 @@ onUnmounted(() => {
   display: block;
   font-size: 20rpx;
   color: #757575;
-  margin-top: 10rpx;
-  line-height: 1.4;
+  margin-top: 8rpx;
+  line-height: 1.35;
 }
 .result-card {
   background: #e8f5e9;
   border-radius: 12rpx;
-  padding: 20rpx;
+  padding: 16rpx;
   text-align: center;
 }
 .result-title {
@@ -600,13 +493,29 @@ onUnmounted(() => {
 .result-winner {
   font-size: 24rpx;
   color: #212121;
-  margin: 12rpx 0 16rpx;
+  margin: 10rpx 0 14rpx;
   display: block;
 }
 .err {
   color: #c62828;
   font-size: 24rpx;
-  margin-top: 8rpx;
+  margin-top: 6rpx;
   flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .game-body {
+    flex-direction: row;
+    align-items: stretch;
+  }
+  .board-pane {
+    flex: 1.15;
+  }
+  .control-pane {
+    flex: 0.85;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+  }
 }
 </style>

@@ -17,7 +17,8 @@ class JoinPlayerRequest(BaseModel):
 
 
 class StartRoomRequest(BaseModel):
-    pass
+    playerId: str = Field(min_length=1, max_length=64)
+    deviceId: str = Field(min_length=8, max_length=128)
 
 
 class PlayerActionRequest(BaseModel):

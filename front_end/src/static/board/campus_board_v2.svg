@@ -65,17 +65,19 @@
   </defs>
 
   <rect class="bg" width="1200" height="900"/>
-  <path class="route" d="M180 125 H1020 V775 H180 Z"/>
+  <path class="route" d="M210 148 H990 V752 H210 Z"/>
 
-  <ellipse class="center-grass" cx="600" cy="450" rx="340" ry="220"/>
-  <rect class="center-card" x="415" y="342" width="370" height="135" rx="28"/>
-  <text class="center-title" x="600" y="397">CampusMonopoly</text>
-  <text class="center-sub" x="600" y="432">宿舍交流 · 储蓄规划 · 校园社交</text>
-  <rect class="center-card" x="505" y="502" width="190" height="74" rx="20"/>
-  <text class="fund-label" x="600" y="531">公共储备金</text>
-  <text class="fund-value" x="600" y="560">¥ 0</text>
+  <g id="center-decoration" opacity="0.28">
+    <ellipse class="center-grass" cx="600" cy="450" rx="340" ry="220"/>
+    <rect class="center-card" x="415" y="342" width="370" height="135" rx="28"/>
+    <text class="center-title" x="600" y="397">CampusMonopoly</text>
+    <text class="center-sub" x="600" y="432">宿舍交流 · 储蓄规划 · 校园社交</text>
+    <rect class="center-card" x="505" y="502" width="190" height="74" rx="20"/>
+    <text class="fund-label" x="600" y="531">公共储备金</text>
+    <text class="fund-value" x="600" y="560">¥ 0</text>
+  </g>
 
-  <g id="tiles">
+  <g id="tiles" transform="translate(600 450) scale(0.78) translate(-600 -450)">
     <g id="tile-teaching-building" transform="translate(95 55)">
       <rect class="tile-shadow" x="5" y="7" width="170" height="120" rx="22"/>
       <rect class="tile green" width="170" height="120" rx="22"/>

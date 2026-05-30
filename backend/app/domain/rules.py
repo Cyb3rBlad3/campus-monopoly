@@ -61,6 +61,7 @@ def create_waiting_state(
         },
         "turnPhase": "waiting",
         "winnerPlayerId": None,
+        "creatorPlayerId": "",
         "version": 1,
     }
 

@@ -76,6 +76,7 @@
       >
         <text class="player-name">{{ p.name }}</text>
         <text v-if="p.id === session.localPlayerId" class="tag">我</text>
+        <text v-if="p.id === roomCreatorId" class="tag host">房主</text>
         <text v-if="p.bankrupt" class="tag warn">破产</text>
       </view>
       <button
@@ -86,6 +87,9 @@
       >
         开始游戏（至少 2 人）
       </button>
+      <text v-else-if="isWaitingInLobby && !isRoomCreator" class="meta waiting-hint">
+        等待房主开始游戏…
+      </text>
       <button
         v-if="game.gameState.status === 'playing'"
         class="btn primary"
@@ -96,7 +100,7 @@
     </view>
 
     <view class="note">
-      <text>本机同一房间只能使用一个昵称；超过 60 秒未恢复将被踢出；等待房 1 分钟无活动自动关闭。</text>
+      <text>本机同一房间只能使用一个昵称；超过 60 秒未恢复将被踢出；等待房 15 分钟无活动自动关闭。</text>
     </view>
   </view>
 </template>
@@ -138,7 +142,9 @@ const {
 } = useRoomSession();
 
 const PRESENCE_INTERVAL_MS = 20_000;
+const LOBBY_POLL_INTERVAL_MS = 4_000;
 let presenceTimer: ReturnType<typeof setInterval> | null = null;
+let lobbyPollTimer: ReturnType<typeof setInterval> | null = null;
 
 function startPresenceHeartbeat() {
   stopPresenceHeartbeat();
@@ -153,6 +159,28 @@ function stopPresenceHeartbeat() {
   if (presenceTimer) {
     clearInterval(presenceTimer);
     presenceTimer = null;
+  }
+}
+
+function startLobbyPoll() {
+  stopLobbyPoll();
+  lobbyPollTimer = setInterval(async () => {
+    if (!session.gameId || game.gameState?.status !== "waiting" || loading.value) {
+      return;
+    }
+    const wasWaiting = game.gameState.status === "waiting";
+    await game.refresh(session.gameId);
+    if (wasWaiting && game.gameState?.status === "playing") {
+      uni.showToast({ title: "游戏已开始", icon: "success" });
+      goBoard();
+    }
+  }, LOBBY_POLL_INTERVAL_MS);
+}
+
+function stopLobbyPoll() {
+  if (lobbyPollTimer) {
+    clearInterval(lobbyPollTimer);
+    lobbyPollTimer = null;
   }
 }
 
@@ -173,13 +201,29 @@ const statusLabel = computed(() => {
   return s ?? "—";
 });
 
+const isWaitingInLobby = computed(
+  () => game.gameState?.status === "waiting" && !!session.roomId
+);
+
+const roomCreatorId = computed(() => {
+  const gs = game.gameState;
+  if (!gs) return "";
+  if (gs.creatorPlayerId) return gs.creatorPlayerId;
+  return gs.players[0]?.id ?? "";
+});
+
+const isRoomCreator = computed(
+  () => !!session.localPlayerId && session.localPlayerId === roomCreatorId.value
+);
+
 const canStart = computed(() => {
   const gs = game.gameState;
   return (
     !!gs &&
     gs.status === "waiting" &&
     gs.players.length >= 2 &&
-    !!session.roomId
+    !!session.roomId &&
+    isRoomCreator.value
   );
 });
 
@@ -287,16 +331,26 @@ async function refreshLobby() {
     return;
   }
   loading.value = true;
+  const wasWaiting = game.gameState?.status === "waiting";
   await game.refresh(session.gameId);
   loading.value = false;
+  if (wasWaiting && game.gameState?.status === "playing") {
+    uni.showToast({ title: "游戏已开始", icon: "success" });
+    goBoard();
+  }
 }
 
 async function handleStartGame() {
-  if (!session.roomId) return;
+  if (!session.roomId || !session.localPlayerId) return;
   loading.value = true;
-  const ok = await game.startGame(session.roomId);
+  const ok = await game.startGame(
+    session.roomId,
+    session.localPlayerId,
+    getDeviceId()
+  );
   loading.value = false;
   if (ok) {
+    stopLobbyPoll();
     uni.showToast({ title: "游戏开始", icon: "success" });
     goBoard();
   }
@@ -323,6 +377,7 @@ onMounted(async () => {
     await tryAutoReconnect();
   }
   startPresenceHeartbeat();
+  startLobbyPoll();
 });
 
 onShow(() => {
@@ -333,6 +388,7 @@ onShow(() => {
 
 onUnmounted(() => {
   stopPresenceHeartbeat();
+  stopLobbyPoll();
 });
 </script>
 
@@ -432,6 +488,15 @@ onUnmounted(() => {
 .tag.warn {
   color: #c62828;
   background: #ffcdd2;
+}
+.tag.host {
+  color: #e65100;
+  background: #ffe0b2;
+}
+.waiting-hint {
+  display: block;
+  margin-top: 16rpx;
+  color: #757575;
 }
 .note {
   font-size: 24rpx;

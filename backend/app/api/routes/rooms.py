@@ -56,8 +56,7 @@ def join_room(
 @router.post("/{room_id}/start")
 def start_room(
     room_id: str,
-    body: StartRoomRequest | None = None,
+    body: StartRoomRequest,
     db: Session = Depends(get_db),
 ):
-    _ = body or StartRoomRequest()
-    return GameService(db).start_room(room_id)
+    return GameService(db).start_room(room_id, body)

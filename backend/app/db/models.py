@@ -29,6 +29,7 @@ class RoomModel(Base):
     max_players: Mapped[int] = mapped_column(Integer, default=4)
     initial_allowance: Mapped[int] = mapped_column(Integer, default=2000)
     status: Mapped[str] = mapped_column(String(32), default="waiting")
+    creator_player_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now, onupdate=utc_now

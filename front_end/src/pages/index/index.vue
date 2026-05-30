@@ -65,7 +65,7 @@
 
     <view class="tips">
       <text class="tip-line">接口：{{ apiBase || "未配置 VITE_API_BASE_URL" }}</text>
-      <text class="tip-line">超过 60 秒未恢复连接将被踢出房间；等待房 1 分钟无活动自动关闭。</text>
+      <text class="tip-line">超过 60 秒未恢复连接将被踢出房间；等待房 15 分钟无活动自动关闭。</text>
       <text class="tip-line">断线恢复网络后将按本地昵称自动重连。</text>
     </view>
   </view>
@@ -123,7 +123,9 @@ function roomExpiryHint(room: RoomSummary): string {
     0,
     Math.ceil((new Date(room.expiresAt).getTime() - Date.now()) / 1000)
   );
-  return left > 0 ? `约 ${left} 秒后自动关闭` : "即将关闭";
+  if (left <= 120) return "即将关闭";
+  const minutes = Math.ceil(left / 60);
+  return `约 ${minutes} 分钟无活动后自动关闭`;
 }
 
 function roomActionHint(room: RoomSummary): string {

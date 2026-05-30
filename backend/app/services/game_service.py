@@ -19,6 +19,7 @@ from app.schemas.game import (
     EndTurnRequest,
     JoinPlayerRequest,
     RollRequest,
+    StartRoomRequest,
     TileActionRequest,
     UseCardRequest,
 )
@@ -118,7 +119,12 @@ class GameService:
         game = self._get_game_by_room(room_id)
         room_players = existing_players + [new_player]
         players = self._players_from_room_players(room, room_players)
+        if len(existing_players) == 0:
+            room.creator_player_id = player_id
+            self.db.add(room)
         game.state_json = rules.sync_waiting_players(game.state_json, players)
+        if room.creator_player_id:
+            game.state_json["creatorPlayerId"] = room.creator_player_id
         self._touch_room(room)
         self.db.add(game)
         self.db.commit()
@@ -188,14 +194,27 @@ class GameService:
             "reconnected": True,
         }
 
-    def start_room(self, room_id: str) -> dict:
+    def start_room(self, room_id: str, body: StartRoomRequest) -> dict:
         room = self._get_room(room_id)
         if room.status != "waiting":
             raise AppError("房间已经开局", 409)
 
+        player_id = body.playerId.strip()
+        device_id = _normalize_device_id(body.deviceId)
+        if not player_id or not device_id:
+            raise AppError("缺少玩家身份", 400)
+
         room_players = self._room_players(room_id)
         if len(room_players) < 2:
             raise AppError("至少需要 2 名玩家才能开局", 400)
+
+        creator_id = room.creator_player_id or (room_players[0].id if room_players else None)
+        if player_id != creator_id:
+            raise AppError("只有创建房间的玩家可以开始游戏", 403)
+
+        matched = self._find_player_by_device(room_players, device_id)
+        if matched is None or matched.id != player_id:
+            raise AppError("玩家身份校验失败", 403)
 
         game = self._get_game_by_room(room_id)
         players = self._players_from_room_players(room, room_players)
@@ -288,6 +307,7 @@ class GameService:
             "expiresAt": expires_at.isoformat() if room.status == "waiting" else None,
             "waitingTtlSeconds": WAITING_ROOM_TTL_SECONDS,
             "playerPresenceTtlSeconds": PLAYER_PRESENCE_TTL_SECONDS,
+            "creatorPlayerId": room.creator_player_id or "",
         }
 
     def _save_mutation(

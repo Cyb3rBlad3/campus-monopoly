@@ -113,6 +113,7 @@ export interface GameState {
   settings: GameSettings;
   turnPhase?: TurnPhase | string;
   winnerPlayerId?: string | null;
+  creatorPlayerId?: string;
   version?: number;
 }
 
