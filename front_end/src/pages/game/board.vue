@@ -33,7 +33,19 @@
           :enhanced="true"
         >
           <view class="control-inner">
-            <view v-if="lastMessages.length" class="log-card">
+            <TurnRevealPanel
+              v-if="isRevealing && revealData"
+              :phase="revealPhase"
+              :player-name="revealData.playerName"
+              :dice="revealData.dice"
+              :passive-meta="revealData.passiveMeta"
+              :card-meta="revealData.cardMeta"
+              :step-index="revealData.stepIndex"
+              :step-total="revealData.stepTotal"
+              @skip="skipReveal"
+            />
+
+            <view v-if="showLog" class="log-card">
               <text class="log-title">本回合动态</text>
               <text v-for="(m, i) in lastMessages" :key="i" class="log-line">{{ m }}</text>
             </view>
@@ -115,7 +127,9 @@ import { useNetworkStore } from "../../stores/network";
 import { useGamePlay } from "../../composables/useGamePlay";
 import { useRoomSession } from "../../composables/useRoomSession";
 import ComposedBoard from "../../components/ComposedBoard.vue";
+import TurnRevealPanel from "../../components/TurnRevealPanel.vue";
 import { TILE_ACTION_LABELS } from "../../utils/gameLabels";
+import { useTurnReveal } from "../../composables/useTurnReveal";
 
 const session = useSessionStore();
 const game = useGameStore();
@@ -134,6 +148,14 @@ const {
   playableCards,
   otherPlayers,
 } = useGamePlay();
+
+const {
+  revealPhase,
+  revealData,
+  isRevealing,
+  showLog,
+  skipReveal,
+} = useTurnReveal();
 
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 let presenceTimer: ReturnType<typeof setInterval> | null = null;

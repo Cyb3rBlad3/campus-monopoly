@@ -228,12 +228,14 @@ class GameService:
         return self._mutation_response(game.state_json, None)
 
     def get_game(self, game_id: str) -> dict:
-        return deepcopy(self._get_game(game_id).state_json)
+        game = self._get_game(game_id)
+        return self._ensure_fresh_state(game)
 
     def roll(self, game_id: str, body: RollRequest) -> dict:
         game = self._get_game(game_id)
+        state = self._ensure_fresh_state(game)
         next_state, turn_result = rules.roll(
-            game.state_json,
+            state,
             player_id=body.playerId,
             dice=body.dice,
         )
@@ -241,8 +243,9 @@ class GameService:
 
     def tile_action(self, game_id: str, body: TileActionRequest) -> dict:
         game = self._get_game(game_id)
+        state = self._ensure_fresh_state(game)
         next_state, turn_result = rules.tile_action(
-            game.state_json,
+            state,
             player_id=body.playerId,
             action=body.action,
             target_player_id=body.targetPlayerId,
@@ -252,8 +255,9 @@ class GameService:
 
     def use_card(self, game_id: str, body: UseCardRequest) -> dict:
         game = self._get_game(game_id)
+        state = self._ensure_fresh_state(game)
         next_state, turn_result = rules.use_card(
-            game.state_json,
+            state,
             player_id=body.playerId,
             card_id=body.cardId,
             target_player_id=body.targetPlayerId,
@@ -262,8 +266,16 @@ class GameService:
 
     def end_turn(self, game_id: str, body: EndTurnRequest) -> dict:
         game = self._get_game(game_id)
-        next_state, turn_result = rules.end_turn(game.state_json, player_id=body.playerId)
+        state = self._ensure_fresh_state(game)
+        next_state, turn_result = rules.end_turn(state, player_id=body.playerId)
         return self._save_mutation(game, next_state, turn_result)
+
+    def _ensure_fresh_state(self, game: GameModel) -> dict:
+        next_state, turn_result, auto_ended = rules.maybe_auto_end_turn(game.state_json)
+        if auto_ended:
+            self._save_mutation(game, next_state, turn_result)
+            self.db.refresh(game)
+        return deepcopy(game.state_json)
 
     def _expire_waiting_rooms(self) -> None:
         cutoff = utc_now() - timedelta(seconds=WAITING_ROOM_TTL_SECONDS)

@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import random
 from copy import deepcopy
+from datetime import datetime, timedelta
 from typing import Any
 
 from app.core.errors import AppError
+from app.db.models import ensure_utc_aware, utc_now
 from app.domain.seeds import clone_action_cards, clone_board, clone_passive_events
 
 
@@ -53,11 +55,15 @@ def create_waiting_state(
             "discardPile": [],
         },
         "lastResult": None,
+        "turnDeadlineAt": None,
+        "currentTurnContext": None,
         "settings": {
             "maxPlayers": max_players,
             "maxHandCards": 3,
             "parentTransferInterval": 4,
             "coWinRoundLimit": 20,
+            "turnActionLimitSeconds": 35,
+            "turnCountdownWarnSeconds": 15,
         },
         "turnPhase": "waiting",
         "winnerPlayerId": None,
@@ -134,6 +140,8 @@ def start_game_from_players(
     new_state["currentPlayerId"] = players[0]["id"]
     new_state["turnPhase"] = "awaiting_roll"
     new_state["lastResult"] = None
+    new_state["turnDeadlineAt"] = None
+    new_state["currentTurnContext"] = None
     new_state["version"] = new_state.get("version", 1) + 1
     return new_state
 
@@ -177,6 +185,8 @@ def roll(
 
     player["turnFlags"]["rolled"] = True
     new_state["turnPhase"] = "awaiting_action"
+    _set_turn_deadline(new_state)
+    _set_turn_context(new_state, player_id, result)
     _finish_mutation(new_state, result)
     return new_state, result
 
@@ -309,6 +319,7 @@ def end_turn(
         new_state["winnerPlayerId"] = active[0]["id"]
         new_state["currentPlayerId"] = active[0]["id"]
         new_state["turnPhase"] = "finished"
+        _clear_turn_timing(new_state)
         result["messages"].append(f"游戏结束，{active[0]['name']} 获胜")
     else:
         _advance_turn(new_state)
@@ -316,6 +327,25 @@ def end_turn(
 
     _finish_mutation(new_state, result)
     return new_state, result
+
+
+def maybe_auto_end_turn(
+    state: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any] | None, bool]:
+    if state.get("status") != "playing":
+        return state, None, False
+    deadline_raw = state.get("turnDeadlineAt")
+    if not deadline_raw:
+        return state, None, False
+    deadline = _parse_deadline(str(deadline_raw))
+    if utc_now() < deadline:
+        return state, None, False
+
+    player_id = state["currentPlayerId"]
+    new_state, result = end_turn(state, player_id=player_id)
+    result["messages"].insert(0, "行动超时，自动结束回合")
+    new_state["lastResult"] = result
+    return new_state, result, True
 
 
 def sync_waiting_players(state: dict[str, Any], players: list[dict[str, Any]]) -> dict[str, Any]:
@@ -576,6 +606,34 @@ def _advance_turn(state: dict[str, Any]) -> None:
     state["currentPlayerId"] = players[next_index]["id"]
     players[next_index]["turnFlags"] = {"rolled": False, "usedCard": False, "tileActionUsed": False}
     state["turnPhase"] = "awaiting_roll"
+    _clear_turn_timing(state)
+
+
+def _turn_action_limit_seconds(state: dict[str, Any]) -> int:
+    return int(state.get("settings", {}).get("turnActionLimitSeconds", 35))
+
+
+def _parse_deadline(iso_str: str) -> datetime:
+    normalized = iso_str.replace("Z", "+00:00")
+    return ensure_utc_aware(datetime.fromisoformat(normalized))
+
+
+def _set_turn_deadline(state: dict[str, Any]) -> None:
+    seconds = _turn_action_limit_seconds(state)
+    state["turnDeadlineAt"] = (utc_now() + timedelta(seconds=seconds)).isoformat()
+
+
+def _clear_turn_timing(state: dict[str, Any]) -> None:
+    state["turnDeadlineAt"] = None
+    state["currentTurnContext"] = None
+
+
+def _set_turn_context(state: dict[str, Any], player_id: str, result: dict[str, Any]) -> None:
+    state["currentTurnContext"] = {
+        "playerId": player_id,
+        "triggeredEventId": result.get("triggeredEventId"),
+        "drawnCardId": result.get("drawnCardId"),
+    }
 
 
 def _finish_mutation(state: dict[str, Any], result: dict[str, Any]) -> None:

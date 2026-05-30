@@ -325,3 +325,66 @@ def test_end_turn_switches_current_player(client: TestClient):
     end_res = client.post(f"/api/games/{game_id}/end-turn", json={"playerId": first_player})
     assert end_res.status_code == 200
     assert end_res.json()["gameState"]["currentPlayerId"] == second_player
+
+
+def test_roll_sets_turn_deadline_and_context(client: TestClient):
+    state = create_started_game(client)
+    game_id = state["gameId"]
+    player_id = state["currentPlayerId"]
+
+    roll_res = client.post(f"/api/games/{game_id}/roll", json={"playerId": player_id, "dice": 2})
+    assert roll_res.status_code == 200
+    next_state = roll_res.json()["gameState"]
+    result = roll_res.json()["turnResult"]
+
+    assert next_state["turnPhase"] == "awaiting_action"
+    assert next_state["turnDeadlineAt"]
+    assert next_state["currentTurnContext"]["playerId"] == player_id
+    assert next_state["currentTurnContext"]["triggeredEventId"] == result.get("triggeredEventId")
+    assert next_state["currentTurnContext"]["drawnCardId"] == result.get("drawnCardId")
+    assert next_state["settings"]["turnActionLimitSeconds"] == 35
+
+
+def test_end_turn_clears_turn_timing(client: TestClient):
+    state = create_started_game(client)
+    game_id = state["gameId"]
+    player_id = state["currentPlayerId"]
+
+    client.post(f"/api/games/{game_id}/roll", json={"playerId": player_id, "dice": 1})
+    end_res = client.post(f"/api/games/{game_id}/end-turn", json={"playerId": player_id})
+    assert end_res.status_code == 200
+    next_state = end_res.json()["gameState"]
+    assert next_state["turnDeadlineAt"] is None
+    assert next_state["currentTurnContext"] is None
+    assert next_state["turnPhase"] == "awaiting_roll"
+
+
+def test_expired_deadline_auto_ends_turn_on_get_game(client: TestClient):
+    from datetime import timedelta
+
+    from app.db.models import utc_now
+    from app.db.session import SessionLocal
+    from app.db.models import GameModel
+
+    state = create_started_game(client)
+    game_id = state["gameId"]
+    first_player = state["currentPlayerId"]
+    second_player = state["players"][1]["id"]
+
+    roll_res = client.post(f"/api/games/{game_id}/roll", json={"playerId": first_player, "dice": 1})
+    assert roll_res.status_code == 200
+
+    with SessionLocal() as db:
+        game = db.get(GameModel, game_id)
+        assert game is not None
+        game.state_json["turnDeadlineAt"] = (utc_now() - timedelta(seconds=1)).isoformat()
+        db.add(game)
+        db.commit()
+
+    get_res = client.get(f"/api/games/{game_id}")
+    assert get_res.status_code == 200
+    loaded = get_res.json()
+    assert loaded["currentPlayerId"] == second_player
+    assert loaded["turnDeadlineAt"] is None
+    assert loaded["currentTurnContext"] is None
+    assert any("行动超时" in msg for msg in loaded["lastResult"]["messages"])

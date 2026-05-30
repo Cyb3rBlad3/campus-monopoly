@@ -8,6 +8,14 @@ export interface GameSettings {
   maxHandCards: number;
   parentTransferInterval: number;
   coWinRoundLimit: number;
+  turnActionLimitSeconds?: number;
+  turnCountdownWarnSeconds?: number;
+}
+
+export interface CurrentTurnContext {
+  playerId: string;
+  triggeredEventId?: string | null;
+  drawnCardId?: string | null;
 }
 
 export interface SavingGoal {
@@ -110,6 +118,8 @@ export interface GameState {
   players: Player[];
   decks: GameDecks;
   lastResult: TurnResult | null;
+  turnDeadlineAt?: string | null;
+  currentTurnContext?: CurrentTurnContext | null;
   settings: GameSettings;
   turnPhase?: TurnPhase | string;
   winnerPlayerId?: string | null;

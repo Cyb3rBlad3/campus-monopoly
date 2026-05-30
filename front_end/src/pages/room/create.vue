@@ -11,7 +11,7 @@
           class="input"
           type="text"
           maxlength="32"
-          placeholder="2-4 人本地轮流游玩"
+          placeholder="打开后自动分配校园昵称"
           @input="onPlayerNameInput"
         />
       </view>
@@ -116,8 +116,13 @@ import { createRoom, joinRoom } from "../../api/game";
 import type { GameMutationResponse } from "../../api/http";
 import {
   findPlayerIdByName,
+  isSamePlayerName,
   normalizePlayerName,
 } from "../../utils/playerName";
+import {
+  pickRandomDictionaryName,
+  suggestDictionaryPlayerName,
+} from "../../utils/playerNameDictionary";
 import {
   assertLocalDeviceCanUseName,
   getDeviceId,
@@ -170,6 +175,7 @@ function startLobbyPoll() {
     }
     const wasWaiting = game.gameState.status === "waiting";
     await game.refresh(session.gameId);
+    applySuggestedPlayerName();
     if (wasWaiting && game.gameState?.status === "playing") {
       uni.showToast({ title: "游戏已开始", icon: "success" });
       goBoard();
@@ -185,10 +191,11 @@ function stopLobbyPoll() {
 }
 
 const roomIdInput = ref("");
-const playerNameInput = ref("玩家");
+const playerNameInput = ref("");
 const loading = ref(false);
 const allowanceIndex = ref(1);
 const goalIndex = ref(1);
+const nameManuallyEdited = ref(false);
 
 const allowanceLabels = ALLOWANCE_OPTIONS.map((o) => o.label);
 const goalLabels = SAVING_GOAL_OPTIONS.map((o) => o.label);
@@ -240,8 +247,41 @@ function onRoomIdInput(e: Event) {
 }
 
 function onPlayerNameInput(e: Event) {
+  nameManuallyEdited.value = true;
   playerNameInput.value = readInputValue(e);
-  session.setPlayerName(playerNameInput.value.trim() || "玩家");
+  session.setPlayerName(normalizePlayerName(playerNameInput.value) || "玩家");
+}
+
+function lobbyPlayerNames(includeSelf = true): string[] {
+  const players = game.gameState?.players ?? [];
+  if (includeSelf) return players.map((p) => p.name);
+  return players
+    .filter((p) => p.id !== session.localPlayerId)
+    .map((p) => p.name);
+}
+
+function applySuggestedPlayerName(preferredName?: string) {
+  const binding = session.roomId ? getRoomBinding(session.roomId) : null;
+  const usedNames = lobbyPlayerNames(true);
+  if (binding?.playerName) {
+    playerNameInput.value = binding.playerName;
+    session.setPlayerName(binding.playerName);
+    nameManuallyEdited.value = true;
+    return;
+  }
+  if (nameManuallyEdited.value) {
+    const current = normalizePlayerName(playerNameInput.value);
+    if (current && !usedNames.some((n) => isSamePlayerName(n, current))) {
+      session.setPlayerName(current);
+      return;
+    }
+  }
+  const picked = suggestDictionaryPlayerName(usedNames, {
+    preferredName: preferredName ?? session.playerName,
+    selfName: session.playerName,
+  });
+  playerNameInput.value = picked;
+  session.setPlayerName(picked);
 }
 
 function onAllowanceChange(e: { detail: { value: string } }) {
@@ -272,7 +312,12 @@ async function handleCreateRoom() {
     }
     const data = result.data as GameState;
     syncRoomFields(data);
-    const name = normalizePlayerName(playerNameInput.value) || "玩家";
+    let name = normalizePlayerName(playerNameInput.value);
+    if (!name) {
+      name = pickRandomDictionaryName([]);
+      playerNameInput.value = name;
+      session.setPlayerName(name);
+    }
     const savingGoalType = SAVING_GOAL_OPTIONS[goalIndex.value].value;
     const ok = await joinRoomByName(data.roomId, name, {
       savingGoalType,
@@ -292,7 +337,12 @@ async function handleJoinRoom() {
   }
   if (loading.value || !network.assertOnline()) return;
 
-  const name = normalizePlayerName(playerNameInput.value) || "玩家";
+  let name = normalizePlayerName(playerNameInput.value);
+  if (!name) {
+    name = pickRandomDictionaryName(lobbyPlayerNames(true));
+    playerNameInput.value = name;
+    session.setPlayerName(name);
+  }
   loading.value = true;
   try {
     const savingGoalType = SAVING_GOAL_OPTIONS[goalIndex.value].value;
@@ -333,6 +383,7 @@ async function refreshLobby() {
   loading.value = true;
   const wasWaiting = game.gameState?.status === "waiting";
   await game.refresh(session.gameId);
+  applySuggestedPlayerName();
   loading.value = false;
   if (wasWaiting && game.gameState?.status === "playing") {
     uni.showToast({ title: "游戏已开始", icon: "success" });
@@ -367,22 +418,24 @@ function goBoard() {
 onMounted(async () => {
   network.init();
   getDeviceId();
-  const binding = session.roomId ? getRoomBinding(session.roomId) : null;
-  playerNameInput.value =
-    binding?.playerName || session.playerName || "玩家";
+  applySuggestedPlayerName(session.playerName);
   roomIdInput.value = session.roomId;
   if (session.gameId) {
     await game.refresh(session.gameId);
   } else if (session.roomId) {
     await tryAutoReconnect();
   }
+  applySuggestedPlayerName(session.playerName);
   startPresenceHeartbeat();
   startLobbyPoll();
 });
 
 onShow(() => {
   if (network.isOnline) {
-    tryAutoReconnect().then(() => pingPresence());
+    tryAutoReconnect().then(() => {
+      pingPresence();
+      applySuggestedPlayerName(session.playerName);
+    });
   }
 });
 

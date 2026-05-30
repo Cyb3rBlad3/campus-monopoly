@@ -14,7 +14,7 @@
         class="input"
         type="text"
         maxlength="32"
-        placeholder="加入或重连时使用"
+        placeholder="打开后自动分配校园昵称"
         @input="onPlayerNameInput"
       />
     </view>
@@ -81,6 +81,11 @@ import { useRoomSession } from "../../composables/useRoomSession";
 import { listRooms } from "../../api/game";
 import { getApiBaseUrl } from "../../config/env";
 import { isSamePlayerName, normalizePlayerName } from "../../utils/playerName";
+import {
+  collectOnlinePlayerNames,
+  pickRandomDictionaryName,
+  suggestDictionaryPlayerName,
+} from "../../utils/playerNameDictionary";
 import { getDeviceId, getRoomBinding } from "../../utils/deviceId";
 import type { RoomSummary } from "../../types/room";
 
@@ -89,11 +94,12 @@ const game = useGameStore();
 const network = useNetworkStore();
 const { enterRoom, tryAutoReconnect } = useRoomSession();
 
-const playerNameInput = ref(session.playerName || "玩家");
+const playerNameInput = ref("");
 const rooms = ref<RoomSummary[]>([]);
 const listLoading = ref(false);
 const listError = ref("");
 const joiningRoomId = ref("");
+const nameManuallyEdited = ref(false);
 
 const apiBase = computed(() => getApiBaseUrl());
 
@@ -106,8 +112,32 @@ function readInputValue(e: Event | { detail?: { value?: string } }): string {
 }
 
 function onPlayerNameInput(e: Event) {
+  nameManuallyEdited.value = true;
   playerNameInput.value = readInputValue(e);
   session.setPlayerName(normalizePlayerName(playerNameInput.value) || "玩家");
+}
+
+function applySuggestedPlayerName(usedNames: string[], preferredName?: string) {
+  const binding = session.roomId ? getRoomBinding(session.roomId) : null;
+  if (binding?.playerName) {
+    playerNameInput.value = binding.playerName;
+    session.setPlayerName(binding.playerName);
+    nameManuallyEdited.value = true;
+    return;
+  }
+  if (nameManuallyEdited.value) {
+    const current = normalizePlayerName(playerNameInput.value);
+    if (current && !usedNames.some((n) => isSamePlayerName(n, current))) {
+      session.setPlayerName(current);
+      return;
+    }
+  }
+  const picked = suggestDictionaryPlayerName(usedNames, {
+    preferredName: preferredName ?? session.playerName,
+    selfName: binding?.playerName,
+  });
+  playerNameInput.value = picked;
+  session.setPlayerName(picked);
 }
 
 function roomStatusLabel(room: RoomSummary): string {
@@ -153,14 +183,16 @@ async function loadRoomList() {
     return;
   }
   rooms.value = res.data.filter((r) => r.status !== "finished");
+  applySuggestedPlayerName(collectOnlinePlayerNames(rooms.value));
 }
 
 async function onJoinRoom(room: RoomSummary) {
   if (joiningRoomId.value) return;
-  const name = normalizePlayerName(playerNameInput.value);
+  let name = normalizePlayerName(playerNameInput.value);
   if (!name) {
-    uni.showToast({ title: "请先输入昵称", icon: "none" });
-    return;
+    name = pickRandomDictionaryName(room.playerNames);
+    playerNameInput.value = name;
+    session.setPlayerName(name);
   }
   joiningRoomId.value = room.roomId;
   try {
@@ -193,10 +225,7 @@ async function goBoard() {
 onMounted(() => {
   network.init();
   getDeviceId();
-  const binding = session.roomId ? getRoomBinding(session.roomId) : null;
-  playerNameInput.value =
-    binding?.playerName || session.playerName || "玩家";
-  if (binding?.playerName) session.setPlayerName(binding.playerName);
+  applySuggestedPlayerName([], session.playerName);
   loadRoomList();
 });
 
